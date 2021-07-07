@@ -33,7 +33,7 @@ export default defineComponent({
     // When message received from web socket then...
     ws.onmessage = function (event) {
       // Easier and shorter.
-      const data: Object = JSON.parse(event.data);
+      const data: Record<string, unknown> = JSON.parse(event.data);
       console.log(data);
     };
 
