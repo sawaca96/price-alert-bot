@@ -1,32 +1,17 @@
 <template>
   <q-page class="q-mt-sm">
-    <div class="q-pa-md q-gutter-sm">
-      <q-btn
-        :ripple="{ color: 'yellow' }"
-        color="secondary"
-        label="Subscribe"
-        no-caps
-        @click="subscribe"
-      />
-      <q-btn
-        :ripple="{ color: 'yellow' }"
-        color="secondary"
-        label="Unsubscribe"
-        no-caps
-        @click="unsubscribe"
-      />
-    </div>
-    <List />
+    <WatchList />
   </q-page>
 </template>
 
 <script lang="ts">
-import List from 'components/List.vue';
 import { defineComponent } from 'vue';
 
+import WatchList from 'components/WatchList.vue';
+
 export default defineComponent({
-  name: 'PageIndex',
-  components: { List },
+  name: 'Index',
+  components: { WatchList },
   setup() {
     const ws = new WebSocket('wss://stream.binance.com:9443/ws');
 

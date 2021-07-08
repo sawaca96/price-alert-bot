@@ -3,7 +3,14 @@
     <q-header bordered class="bg-white">
       <q-toolbar>
         <q-toolbar-title class="text-green-8"> Price Alert Bot </q-toolbar-title>
-        <q-btn flat dense icon="search" aria-label="search" class="text-grey" />
+        <q-btn
+          flat
+          dense
+          icon="search"
+          aria-label="search"
+          class="text-grey"
+          @click="showSearch = true"
+        />
         <q-btn flat dense icon="sort" aria-label="sort" class="text-grey" />
         <q-btn flat dense icon="settings" aria-label="settings" class="text-grey" />
       </q-toolbar>
@@ -12,17 +19,23 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+    <Suspense>
+      <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
+    </Suspense>
   </q-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+
+import SearchDialog from 'components/SearchDialog.vue';
 
 export default defineComponent({
   name: 'MainLayout',
-
+  components: { SearchDialog },
   setup() {
-    return {};
+    const showSearch = ref(false);
+    return { showSearch };
   },
 });
 </script>
