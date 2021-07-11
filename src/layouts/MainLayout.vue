@@ -19,9 +19,7 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-    <Suspense>
-      <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
-    </Suspense>
+    <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
   </q-layout>
 </template>
 
