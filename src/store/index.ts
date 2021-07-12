@@ -1,6 +1,7 @@
 import { store } from 'quasar/wrappers';
 import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as vuexUseStore } from 'vuex';
+import { BinanceSymbol } from '../components/models';
 
 // import example from './module-example'
 // import { ExampleStateInterface } from './module-example/state';
@@ -18,7 +19,8 @@ export interface StateInterface {
   // Define your own store structure, using submodules if needed
   // example: ExampleStateInterface;
   // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
-  example: unknown;
+  // example: unknown;
+  watchlist: BinanceSymbol[];
 }
 
 // provide typings for `this.$store`
@@ -36,7 +38,14 @@ export default store(function (/* { ssrContext } */) {
     modules: {
       // example
     },
-
+    state: () => ({
+      watchlist: [],
+    }),
+    mutations: {
+      APPEND_SYMBOL(state: StateInterface, symbol) {
+        state.watchlist.push(symbol);
+      },
+    },
     // enable strict mode (adds overhead!)
     // for dev mode and --debug builds only
     strict: !!process.env.DEBUGGING,

@@ -14,7 +14,9 @@
       <q-separator />
 
       <q-card-section style="max-height: 50vh" class="scroll">
-        <p v-for="symbol in autocompleteSymbols" :key="symbol.symbol">{{ symbol.symbol }}</p>
+        <p v-for="symbol in autocompleteSymbols" :key="symbol.symbol" @click="addSymbol(symbol)">
+          {{ symbol.symbol }}
+        </p>
       </q-card-section>
 
       <q-separator />
@@ -28,29 +30,11 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
+import { useStore } from '../store';
 
 import axios from 'axios';
 
-interface BinanceSymbol {
-  label: string;
-  baseAsset: string;
-  baseAssetPrecision: number;
-  baseCommissionPrecision: number;
-  filters: Record<string, string>[];
-  icebergAllowed: boolean;
-  isMarginTradingAllowed: boolean;
-  isSpotTradingAllowed: boolean;
-  ocoAllowed: boolean;
-  orderTypes: string[];
-  permissions: string[];
-  quoteAsset: string;
-  quoteAssetPrecision: number;
-  quoteCommissionPrecision: number;
-  quoteOrderQtyMarketAllowed: boolean;
-  quotePrecision: number;
-  status: string;
-  symbol: string;
-}
+import { BinanceSymbol } from './models';
 
 export default defineComponent({
   props: {
@@ -60,6 +44,7 @@ export default defineComponent({
     },
   },
   setup(_, { emit }) {
+    const store = useStore();
     const symbolName = ref('');
     let symbols: BinanceSymbol[] = [];
     let autocompleteSymbols = ref<BinanceSymbol[]>([]);
@@ -79,12 +64,15 @@ export default defineComponent({
       });
       autocompleteSymbols.value = data;
     };
+    const addSymbol = (symbol: BinanceSymbol) => {
+      store.commit('APPEND_SYMBOL', symbol);
+    };
 
     onMounted(async () => {
       await getSymbols();
     });
 
-    return { symbolName, autocompleteSymbols, toggleSearch, autocomplete };
+    return { symbolName, autocompleteSymbols, toggleSearch, autocomplete, addSymbol };
   },
 });
 </script>
