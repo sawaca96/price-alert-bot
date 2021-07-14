@@ -34,6 +34,7 @@ import { useStore } from '../store';
 
 import axios from 'axios';
 
+import { subscribe } from '../core/binance-websocket';
 import { BinanceSymbol } from './models';
 
 export default defineComponent({
@@ -64,8 +65,13 @@ export default defineComponent({
       });
       autocompleteSymbols.value = data;
     };
-    const addSymbol = (symbol: BinanceSymbol) => {
+    const addSymbol = async (symbol: BinanceSymbol) => {
       store.commit('APPEND_SYMBOL', symbol);
+      const data = await axios.get(
+        `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
+      );
+      store.commit('UPDATE_PRICE', data.data);
+      subscribe([symbol.symbol]);
     };
 
     onMounted(async () => {

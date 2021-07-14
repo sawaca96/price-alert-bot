@@ -21,6 +21,7 @@ export interface StateInterface {
   // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
   // example: unknown;
   watchlist: BinanceSymbol[];
+  priceMap: Record<string, string>;
 }
 
 // provide typings for `this.$store`
@@ -40,10 +41,14 @@ export default store(function (/* { ssrContext } */) {
     },
     state: () => ({
       watchlist: [],
+      priceMap: {},
     }),
     mutations: {
-      APPEND_SYMBOL(state: StateInterface, symbol) {
+      APPEND_SYMBOL(state: StateInterface, symbol: BinanceSymbol) {
         state.watchlist.push(symbol);
+      },
+      UPDATE_PRICE(state: StateInterface, payload: Record<string, string>) {
+        state.priceMap[payload.symbol] = payload.price;
       },
     },
     // enable strict mode (adds overhead!)
