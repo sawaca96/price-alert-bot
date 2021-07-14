@@ -37,6 +37,27 @@ import axios from 'axios';
 import { subscribe } from '../core/binance-websocket';
 import { BinanceSymbol } from './models';
 
+const searchSymbol = () => {
+  const symbolName = ref('');
+  let symbols: BinanceSymbol[] = [];
+  const autocompleteSymbols = ref<BinanceSymbol[]>([]);
+
+  const getSymbols = async (): Promise<void> => {
+    const data = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+    symbols = data.data.symbols;
+  };
+  const autocomplete = (name: string) => {
+    const data = symbols.filter((symbol: BinanceSymbol) => {
+      const symbolName: string = symbol.symbol;
+      if (symbolName.startsWith(name.toUpperCase())) return true;
+      return false;
+    });
+    autocompleteSymbols.value = data;
+  };
+
+  return { symbolName, symbols, autocompleteSymbols, getSymbols, autocomplete };
+};
+
 export default defineComponent({
   props: {
     showSearch: {
@@ -46,24 +67,10 @@ export default defineComponent({
   },
   setup(_, { emit }) {
     const store = useStore();
-    const symbolName = ref('');
-    let symbols: BinanceSymbol[] = [];
-    let autocompleteSymbols = ref<BinanceSymbol[]>([]);
+    const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchSymbol();
 
-    const getSymbols = async (): Promise<void> => {
-      const data = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
-      symbols = data.data.symbols;
-    };
     const toggleSearch = (e: Event) => {
       emit('update:showSearch', e);
-    };
-    const autocomplete = (name: string) => {
-      const data = symbols.filter((symbol: BinanceSymbol) => {
-        const symbolName: string = symbol.symbol;
-        if (symbolName.startsWith(name.toUpperCase())) return true;
-        return false;
-      });
-      autocompleteSymbols.value = data;
     };
     const addSymbol = async (symbol: BinanceSymbol) => {
       store.commit('APPEND_SYMBOL', symbol);
