@@ -67,8 +67,8 @@ export default defineComponent({
 
     onMounted(() => {
       createWebSocket();
-      ws.onmessage = function (event: MessageEvent) {
-        const data: BinanceAggTradeStreams = JSON.parse(event.data);
+      ws.onmessage = function (event) {
+        const data: BinanceAggTradeStreams = JSON.parse(event.data) as BinanceAggTradeStreams;
         store.commit('UPDATE_PRICE', { symbol: data.s, price: data.p });
       };
     });
