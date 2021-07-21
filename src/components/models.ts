@@ -32,3 +32,18 @@ export interface BinanceAggTradeStreams {
   m: boolean; // Is the buyer the market maker?
   M: boolean; // Ignore
 }
+
+interface RateLimit {
+  rateLimitType: string;
+  interval: string;
+  intervalNum: number;
+  limit: number;
+}
+
+export interface ExchangeInfo {
+  exchangeFilters: Record<string, unknown>[];
+  rateLimits: RateLimit[];
+  serverTime: number;
+  symbols: BinanceSymbol[];
+  timezone: string;
+}

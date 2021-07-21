@@ -35,7 +35,7 @@ import { useStore } from '../store';
 import axios from 'axios';
 
 import { subscribe } from '../core/binance-websocket';
-import { BinanceSymbol } from './models';
+import { BinanceSymbol, ExchangeInfo } from './models';
 
 const searchSymbol = () => {
   const symbolName = ref('');
@@ -43,7 +43,7 @@ const searchSymbol = () => {
   const autocompleteSymbols = ref<BinanceSymbol[]>([]);
 
   const getSymbols = async (): Promise<void> => {
-    const data = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+    const data = await axios.get<ExchangeInfo>('https://api.binance.com/api/v3/exchangeInfo');
     symbols = data.data.symbols;
   };
   const autocomplete = (name: string) => {
