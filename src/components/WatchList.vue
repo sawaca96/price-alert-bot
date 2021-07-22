@@ -38,13 +38,7 @@ import { db } from '../core/indexed-db';
 import { ws, subscribe } from '../core/binance-websocket';
 
 export default defineComponent({
-  props: {
-    symbolType: {
-      type: String,
-      required: true,
-    },
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
@@ -75,7 +69,7 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      const watchSymbols = (await db.getAll(props.symbolType)) as WatchSymbol[];
+      const watchSymbols = (await db.getAll(store.state.watchlistName)) as WatchSymbol[];
       let symbols = [];
       for (let watchSymbol of watchSymbols) {
         const symbol = watchSymbol.data;

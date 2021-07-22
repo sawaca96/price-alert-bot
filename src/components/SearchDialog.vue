@@ -79,11 +79,11 @@ export default defineComponent({
     };
     const addBinanceSymbol = async (symbol: BinanceSymbol) => {
       const watchSymbol: WatchSymbol = {
-        type: 'binance',
+        type: store.state.watchlistName,
         data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
         alertPrice: -1,
       };
-      await db.add('binance', watchSymbol);
+      await db.add(store.state.watchlistName, watchSymbol);
       const data = await axios.get(
         `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
       );

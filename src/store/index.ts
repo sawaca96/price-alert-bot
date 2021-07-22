@@ -33,7 +33,7 @@ export default store(function (/* { ssrContext } */) {
     modules: {},
     state: () => ({
       watchSymbols: [],
-      watchlistName: '',
+      watchlistName: 'binance',
       priceMap: {},
     }),
     mutations: {
