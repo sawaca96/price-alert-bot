@@ -14,7 +14,11 @@
       <q-separator />
 
       <q-card-section style="max-height: 50vh" class="scroll">
-        <p v-for="symbol in autocompleteSymbols" :key="symbol.symbol" @click="addSymbol(symbol)">
+        <p
+          v-for="symbol in autocompleteSymbols"
+          :key="symbol.symbol"
+          @click="addBinanceSymbol(symbol)"
+        >
           {{ symbol.symbol }}
         </p>
       </q-card-section>
@@ -34,11 +38,11 @@ import { useStore } from '../store';
 
 import axios from 'axios';
 
-import { BinanceSymbol, ExchangeInfo, Watchlist } from './models';
+import { BinanceSymbol, ExchangeInfo, WatchSymbol } from './models';
 import { subscribe } from '../core/binance-websocket';
 import { db } from '../core/indexed-db';
 
-const searchSymbol = () => {
+const searchBinanceSymbol = () => {
   const symbolName = ref('');
   let symbols: BinanceSymbol[] = [];
   const autocompleteSymbols = ref<BinanceSymbol[]>([]);
@@ -68,23 +72,23 @@ export default defineComponent({
   },
   setup(_, { emit }) {
     const store = useStore();
-    const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchSymbol();
+    const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchBinanceSymbol();
 
     const toggleSearch = (e: Event) => {
       emit('update:showSearch', e);
     };
-    const addSymbol = async (symbol: BinanceSymbol) => {
-      const watchSymbol: Watchlist = {
-        type: 'cryptocurrency',
+    const addBinanceSymbol = async (symbol: BinanceSymbol) => {
+      const watchSymbol: WatchSymbol = {
+        type: 'binance',
         data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
         alertPrice: -1,
       };
-      await db.add('watchlist', watchSymbol);
+      await db.add('binance', watchSymbol);
       const data = await axios.get(
         `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
       );
       store.commit('UPDATE_PRICE', data.data);
-      store.commit('APPEND_SYMBOL', symbol);
+      store.commit('APPEND_WATCH_SYMBOL', symbol);
       subscribe([symbol.symbol]);
     };
 
@@ -92,7 +96,7 @@ export default defineComponent({
       await getSymbols();
     });
 
-    return { symbolName, autocompleteSymbols, toggleSearch, autocomplete, addSymbol };
+    return { symbolName, autocompleteSymbols, toggleSearch, autocomplete, addBinanceSymbol };
   },
 });
 </script>

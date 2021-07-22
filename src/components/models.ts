@@ -48,7 +48,7 @@ export interface ExchangeInfo {
   timezone: string;
 }
 
-export interface Watchlist {
+export interface WatchSymbol {
   type: string;
   data: BinanceSymbol;
   alertPrice: number;

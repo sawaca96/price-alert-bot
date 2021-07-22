@@ -1,7 +1,7 @@
 <template>
   <div class="list">
     <q-list>
-      <div class="item-wrap" v-for="symbol in watchlist" :key="symbol.symbol">
+      <div class="item-wrap" v-for="symbol in watchSymbols" :key="symbol.symbol">
         <q-item>
           <q-item-section>
             <q-item-label class="name">{{ symbol.baseAsset }}/{{ symbol.quoteAsset }}</q-item-label>
@@ -31,14 +31,23 @@
 import { defineComponent, computed, onMounted } from 'vue';
 import { useStore } from '../store';
 
-import { BinanceAggTradeStreams } from './models';
-import { ws, createWebSocket } from '../core/binance-websocket';
+import axios from 'axios';
+
+import { BinanceAggTradeStreams, WatchSymbol } from '../components/models';
+import { db } from '../core/indexed-db';
+import { ws, subscribe } from '../core/binance-websocket';
 
 export default defineComponent({
-  setup() {
+  props: {
+    symbolType: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props) {
     const store = useStore();
-    const watchlist = computed(() => {
-      return store.state.watchlist;
+    const watchSymbols = computed(() => {
+      return store.state.watchSymbols;
     });
     const priceMap = computed(() => {
       return store.state.priceMap;
@@ -65,15 +74,26 @@ export default defineComponent({
       return str + z;
     };
 
-    onMounted(() => {
-      createWebSocket();
+    onMounted(async () => {
+      const watchSymbols = (await db.getAll(props.symbolType)) as WatchSymbol[];
+      let symbols = [];
+      for (let watchSymbol of watchSymbols) {
+        const symbol = watchSymbol.data;
+        const data = await axios.get(
+          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
+        );
+        store.commit('UPDATE_PRICE', data.data);
+        store.commit('APPEND_WATCH_SYMBOL', symbol);
+        symbols.push(symbol.symbol);
+      }
+      subscribe(symbols);
       ws.onmessage = function (event) {
         const data: BinanceAggTradeStreams = JSON.parse(event.data) as BinanceAggTradeStreams;
         store.commit('UPDATE_PRICE', { symbol: data.s, price: data.p });
       };
     });
 
-    return { watchlist, priceMap, convert };
+    return { watchSymbols, priceMap, convert };
   },
 });
 </script>

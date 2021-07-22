@@ -13,7 +13,8 @@ import { BinanceSymbol } from '../components/models';
  */
 
 export interface StateInterface {
-  watchlist: BinanceSymbol[];
+  watchSymbols: BinanceSymbol[];
+  watchlistName: string;
   priceMap: Record<string, string>;
 }
 
@@ -31,15 +32,22 @@ export default store(function (/* { ssrContext } */) {
   const Store = createStore<StateInterface>({
     modules: {},
     state: () => ({
-      watchlist: [],
+      watchSymbols: [],
+      watchlistName: '',
       priceMap: {},
     }),
     mutations: {
-      APPEND_SYMBOL(state: StateInterface, symbol: BinanceSymbol) {
-        state.watchlist.push(symbol);
+      APPEND_WATCH_SYMBOL(state: StateInterface, symbol: BinanceSymbol) {
+        state.watchSymbols.push(symbol);
       },
       UPDATE_PRICE(state: StateInterface, payload: Record<string, string>) {
         state.priceMap[payload.symbol] = payload.price;
+      },
+      CLEAR_WATCH_SYMBOLS(state: StateInterface) {
+        state.watchSymbols = [];
+      },
+      CLEAR_PRICE(state: StateInterface) {
+        state.priceMap = {};
       },
     },
     // enable strict mode (adds overhead!)

@@ -1,23 +1,25 @@
 <template>
   <q-page class="q-mt-sm">
-    <WatchList />
+    <WatchList :symbolType="symbolType" />
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, ref } from 'vue';
 
 import { initialize } from '../core/indexed-db';
+import { createWebSocket } from '../core/binance-websocket';
 
 import WatchList from 'components/WatchList.vue';
 
 export default defineComponent({
   name: 'Index',
   components: { WatchList },
-  setup() {
-    onMounted(async () => {
-      await initialize('price-alert-bot', ['watchlist']);
-    });
+  async setup() {
+    const symbolType = ref('binance');
+    createWebSocket();
+    await initialize('price-alert-bot', ['binance']);
+    return { symbolType };
   },
 });
 </script>
