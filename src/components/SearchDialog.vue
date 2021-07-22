@@ -34,8 +34,9 @@ import { useStore } from '../store';
 
 import axios from 'axios';
 
+import { BinanceSymbol, ExchangeInfo, Watchlist } from './models';
 import { subscribe } from '../core/binance-websocket';
-import { BinanceSymbol, ExchangeInfo } from './models';
+import { db } from '../core/indexed-db';
 
 const searchSymbol = () => {
   const symbolName = ref('');
@@ -73,6 +74,12 @@ export default defineComponent({
       emit('update:showSearch', e);
     };
     const addSymbol = async (symbol: BinanceSymbol) => {
+      const watchSymbol: Watchlist = {
+        type: 'cryptocurrency',
+        data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
+        alertPrice: -1,
+      };
+      await db.add('watchlist', watchSymbol);
       const data = await axios.get(
         `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
       );

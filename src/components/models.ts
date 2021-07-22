@@ -47,3 +47,9 @@ export interface ExchangeInfo {
   symbols: BinanceSymbol[];
   timezone: string;
 }
+
+export interface Watchlist {
+  type: string;
+  data: BinanceSymbol;
+  alertPrice: number;
+}
