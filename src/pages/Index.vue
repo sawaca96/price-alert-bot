@@ -75,6 +75,8 @@ export default defineComponent({
     const setupWatchSymbols = async () => {
       await initialize('price-alert-bot', [store.state.watchlistName]);
       const watchSymbols = (await db.getAll(store.state.watchlistName)) as WatchSymbol[];
+      if (!watchSymbols.length) return;
+
       let symbols = [];
       for (let watchSymbol of watchSymbols) {
         const symbol = watchSymbol.data;
