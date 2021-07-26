@@ -12,7 +12,14 @@
           @click="showSearch = true"
         />
         <q-btn flat dense icon="sort" aria-label="sort" class="text-grey" />
-        <q-btn flat dense icon="settings" aria-label="settings" class="text-grey" />
+        <q-btn
+          flat
+          dense
+          icon="settings"
+          aria-label="settings"
+          class="text-grey"
+          @click="showSetting = true"
+        />
       </q-toolbar>
     </q-header>
 
@@ -20,20 +27,23 @@
       <router-view />
     </q-page-container>
     <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
+    <SettingDialog v-model:showSetting="showSetting" v-if="showSetting" />
   </q-layout>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 
-import SearchDialog from 'components/SearchDialog.vue';
+import SearchDialog from '../components/SearchDialog.vue';
+import SettingDialog from '../components/SettingDialog.vue';
 
 export default defineComponent({
   name: 'MainLayout',
-  components: { SearchDialog },
+  components: { SearchDialog, SettingDialog },
   setup() {
     const showSearch = ref(false);
-    return { showSearch };
+    const showSetting = ref(false);
+    return { showSearch, showSetting };
   },
 });
 </script>

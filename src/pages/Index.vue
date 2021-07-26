@@ -2,11 +2,11 @@
   <q-page class="q-mt-sm">
     <div class="list">
       <q-list>
-        <div class="item-wrap" v-for="symbol in watchSymbols" :key="symbol.symbol">
+        <div class="item-wrap" v-for="symbol in watchSymbols" :key="symbol.data.symbol">
           <q-item>
             <q-item-section>
               <q-item-label class="name"
-                >{{ symbol.baseAsset }}/{{ symbol.quoteAsset }}</q-item-label
+                >{{ symbol.data.baseAsset }}/{{ symbol.data.quoteAsset }}</q-item-label
               >
               <q-item-label caption class="market">Market name</q-item-label>
             </q-item-section>
@@ -18,7 +18,7 @@
 
             <q-item-section side>
               <q-item-label class="price">{{
-                exponentialToNumber(parseFloat(priceMap[symbol.symbol]))
+                exponentialToNumber(parseFloat(priceMap[symbol.data.symbol]))
               }}</q-item-label>
               <q-item-label class="change">change</q-item-label>
             </q-item-section>
@@ -79,13 +79,12 @@ export default defineComponent({
 
       let symbols = [];
       for (let watchSymbol of watchSymbols) {
-        const symbol = watchSymbol.data;
         const data = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
+          `https://api.binance.com/api/v3/ticker/price?symbol=${watchSymbol.data.symbol}`
         );
         store.commit('UPDATE_PRICE', data.data);
-        store.commit('APPEND_WATCH_SYMBOL', symbol);
-        symbols.push(symbol.symbol);
+        store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
+        symbols.push(watchSymbol.data.symbol);
       }
       subscribe(symbols);
     };

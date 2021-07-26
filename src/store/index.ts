@@ -1,7 +1,7 @@
 import { store } from 'quasar/wrappers';
 import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as vuexUseStore } from 'vuex';
-import { BinanceSymbol } from '../components/models';
+import { WatchSymbol } from '../components/models';
 
 /*
  * If not building with SSR mode, you can
@@ -13,7 +13,7 @@ import { BinanceSymbol } from '../components/models';
  */
 
 export interface StateInterface {
-  watchSymbols: BinanceSymbol[];
+  watchSymbols: WatchSymbol[];
   watchlistName: string;
   priceMap: Record<string, string>;
 }
@@ -37,7 +37,14 @@ export default store(function (/* { ssrContext } */) {
       priceMap: {},
     }),
     mutations: {
-      APPEND_WATCH_SYMBOL(state: StateInterface, symbol: BinanceSymbol) {
+      DELETE_WATCH_SYMBOLS(state: StateInterface, symbol: string) {
+        state.watchSymbols = state.watchSymbols.filter((item) => {
+          if (item.data.symbol === symbol) return false;
+          else return true;
+        });
+        delete state.priceMap[symbol];
+      },
+      APPEND_WATCH_SYMBOL(state: StateInterface, symbol: WatchSymbol) {
         state.watchSymbols.push(symbol);
       },
       UPDATE_PRICE(state: StateInterface, payload: Record<string, string>) {
