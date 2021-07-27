@@ -11,10 +11,10 @@
               <q-item-label caption class="market">Market name</q-item-label>
             </q-item-section>
 
-            <q-item-section>
+            <!-- <q-item-section>
               <q-item-label class="chart">line chart</q-item-label>
               <q-item-label caption class="chart">comming soon</q-item-label>
-            </q-item-section>
+            </q-item-section> -->
 
             <q-item-section side>
               <q-item-label class="price">{{
