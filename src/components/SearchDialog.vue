@@ -78,18 +78,24 @@ export default defineComponent({
       emit('update:showSearch', e);
     };
     const addBinanceSymbol = async (symbol: BinanceSymbol) => {
-      const watchSymbol: WatchSymbol = {
-        type: store.state.watchlistName,
-        data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
-        alertPrice: -1,
-      };
-      await db.add(store.state.watchlistName, watchSymbol, symbol.symbol);
-      const data = await axios.get(
-        `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
-      );
-      store.commit('UPDATE_PRICE', data.data);
-      store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
-      subscribe([symbol.symbol]);
+      try {
+        const watchSymbol: WatchSymbol = {
+          type: store.state.watchlistName,
+          data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
+          alertPrice: -1,
+        };
+        await db.add(store.state.watchlistName, watchSymbol, symbol.symbol);
+        const data = await axios.get(
+          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
+        );
+        store.commit('UPDATE_PRICE', data.data);
+        store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
+        subscribe([symbol.symbol]);
+      } catch (e) {
+        if (e.message === 'Key already exists in the object store.') {
+          alert('Duplicated Symbol');
+        }
+      }
     };
 
     onMounted(async () => {
