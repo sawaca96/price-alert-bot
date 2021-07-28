@@ -1,5 +1,11 @@
 import { IDBPDatabase, openDB } from 'idb';
 
+export interface IDBError {
+  code: number;
+  message: string;
+  name: string;
+}
+
 export let db: IDBPDatabase<unknown>;
 
 export const initialize = async (database: string, tableNames: string[]) => {

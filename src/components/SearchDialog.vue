@@ -36,7 +36,7 @@ import axios from 'axios';
 
 import { ExchangeInfo, WatchSymbol } from './models';
 import { subscribe } from '../core/binance-websocket';
-import { db } from '../core/indexed-db';
+import { db, IDBError } from '../core/indexed-db';
 
 const searchSymbol = () => {
   const symbolName = ref('');
@@ -94,7 +94,8 @@ export default defineComponent({
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
         subscribe([symbol]);
       } catch (e) {
-        if (e.message === 'Key already exists in the object store.') {
+        const { message } = e as IDBError;
+        if (message === 'Key already exists in the object store.') {
           alert('Duplicated Symbol');
         }
       }
