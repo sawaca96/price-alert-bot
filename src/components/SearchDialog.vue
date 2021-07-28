@@ -14,12 +14,8 @@
       <q-separator />
 
       <q-card-section style="max-height: 50vh" class="scroll">
-        <p
-          v-for="symbol in autocompleteSymbols"
-          :key="symbol.symbol"
-          @click="addBinanceSymbol(symbol)"
-        >
-          {{ symbol.symbol }}
+        <p v-for="symbol in autocompleteSymbols" :key="symbol" @click="addSymbol(exchange, symbol)">
+          {{ symbol }}
         </p>
       </q-card-section>
 
@@ -33,28 +29,31 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, computed, ref, onMounted } from 'vue';
 import { useStore } from '../store';
 
 import axios from 'axios';
 
-import { BinanceSymbol, ExchangeInfo, WatchSymbol } from './models';
+import { ExchangeInfo, WatchSymbol } from './models';
 import { subscribe } from '../core/binance-websocket';
 import { db } from '../core/indexed-db';
 
-const searchBinanceSymbol = () => {
+const searchSymbol = () => {
   const symbolName = ref('');
-  let symbols: BinanceSymbol[] = [];
-  const autocompleteSymbols = ref<BinanceSymbol[]>([]);
+  let symbols: string[] = [];
+  const autocompleteSymbols = ref<string[]>([]);
 
-  const getSymbols = async (): Promise<void> => {
-    const data = await axios.get<ExchangeInfo>('https://api.binance.com/api/v3/exchangeInfo');
-    symbols = data.data.symbols;
+  const getSymbols = async (exchange: string): Promise<void> => {
+    if (exchange === 'BINANCE') {
+      const data = await axios.get<ExchangeInfo>('https://api.binance.com/api/v3/exchangeInfo');
+      for (let symbol of data.data.symbols) {
+        symbols.push(symbol.symbol);
+      }
+    }
   };
-  const autocomplete = (name: string) => {
-    const data = symbols.filter((symbol: BinanceSymbol) => {
-      const symbolName: string = symbol.symbol;
-      if (symbolName.startsWith(name.toUpperCase())) return true;
+  const autocomplete = (inputName: string) => {
+    const data = symbols.filter((symbol: string) => {
+      if (symbol.startsWith(inputName.toUpperCase())) return true;
       return false;
     });
     autocompleteSymbols.value = data;
@@ -72,25 +71,28 @@ export default defineComponent({
   },
   setup(_, { emit }) {
     const store = useStore();
-    const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchBinanceSymbol();
+    const exchange = computed(() => {
+      return store.state.exchange;
+    });
+    const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchSymbol();
 
     const toggleSearch = (e: Event) => {
       emit('update:showSearch', e);
     };
-    const addBinanceSymbol = async (symbol: BinanceSymbol) => {
+    const addSymbol = async (exchange: string, symbol: string) => {
       try {
         const watchSymbol: WatchSymbol = {
-          type: store.state.watchlistName,
-          data: JSON.parse(JSON.stringify(symbol)) as BinanceSymbol,
+          type: exchange,
+          symbol: symbol,
           alertPrice: -1,
         };
-        await db.add(store.state.watchlistName, watchSymbol, symbol.symbol);
+        await db.add(store.state.watchlistName, watchSymbol, symbol);
         const data = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.symbol}`
+          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
         );
         store.commit('UPDATE_PRICE', data.data);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
-        subscribe([symbol.symbol]);
+        subscribe([symbol]);
       } catch (e) {
         if (e.message === 'Key already exists in the object store.') {
           alert('Duplicated Symbol');
@@ -99,10 +101,10 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      await getSymbols();
+      await getSymbols(exchange.value);
     });
 
-    return { symbolName, autocompleteSymbols, toggleSearch, autocomplete, addBinanceSymbol };
+    return { exchange, symbolName, autocompleteSymbols, toggleSearch, autocomplete, addSymbol };
   },
 });
 </script>

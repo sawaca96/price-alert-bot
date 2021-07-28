@@ -9,12 +9,10 @@
 
       <q-card-section style="max-height: 50vh; width: 30vh" class="scroll">
         <q-list>
-          <div class="item-wrap" v-for="symbol in watchSymbols" :key="symbol.data.symbol">
+          <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
             <q-item>
               <q-item-section>
-                <q-item-label class="name"
-                  >{{ symbol.data.baseAsset }}/{{ symbol.data.quoteAsset }}</q-item-label
-                >
+                <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
               </q-item-section>
 
               <q-item-section>
@@ -28,7 +26,7 @@
                   icon="delete"
                   aria-label="delete"
                   class="text-grey"
-                  @click="deleteSymbol(symbol)"
+                  @click="deleteSymbol(watchSymbol)"
                 />
               </q-item-section>
             </q-item>
@@ -70,9 +68,9 @@ export default defineComponent({
     const toggleSetting = (e: Event) => {
       emit('update:showSetting', e);
     };
-    const deleteSymbol = async (symbol: WatchSymbol) => {
-      await db.delete(store.state.watchlistName, symbol.data.symbol);
-      store.commit('DELETE_WATCH_SYMBOLS', symbol.data.symbol);
+    const deleteSymbol = async (watchSymbol: WatchSymbol) => {
+      await db.delete(store.state.watchlistName, watchSymbol.symbol);
+      store.commit('DELETE_WATCH_SYMBOLS', watchSymbol.symbol);
     };
     return { toggleSetting, watchSymbols, deleteSymbol };
   },

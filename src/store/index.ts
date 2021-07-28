@@ -15,6 +15,7 @@ import { WatchSymbol } from '../components/models';
 export interface StateInterface {
   watchSymbols: WatchSymbol[];
   watchlistName: string;
+  exchange: string;
   priceMap: Record<string, string>;
 }
 
@@ -33,19 +34,20 @@ export default store(function (/* { ssrContext } */) {
     modules: {},
     state: () => ({
       watchSymbols: [],
-      watchlistName: 'binance',
+      watchlistName: 'watchlist',
+      exchange: 'BINANCE',
       priceMap: {},
     }),
     mutations: {
       DELETE_WATCH_SYMBOLS(state: StateInterface, symbol: string) {
-        state.watchSymbols = state.watchSymbols.filter((item) => {
-          if (item.data.symbol === symbol) return false;
+        state.watchSymbols = state.watchSymbols.filter((watchSymbol) => {
+          if (watchSymbol.symbol === symbol) return false;
           else return true;
         });
         delete state.priceMap[symbol];
       },
-      APPEND_WATCH_SYMBOL(state: StateInterface, symbol: WatchSymbol) {
-        state.watchSymbols.push(symbol);
+      APPEND_WATCH_SYMBOL(state: StateInterface, watchSymbol: WatchSymbol) {
+        state.watchSymbols.push(watchSymbol);
       },
       UPDATE_PRICE(state: StateInterface, payload: Record<string, string>) {
         state.priceMap[payload.symbol] = payload.price;
@@ -55,6 +57,9 @@ export default store(function (/* { ssrContext } */) {
       },
       CLEAR_PRICE(state: StateInterface) {
         state.priceMap = {};
+      },
+      SET_EXCHANGE(state: StateInterface, exchange: string) {
+        state.exchange = exchange;
       },
     },
     // enable strict mode (adds overhead!)

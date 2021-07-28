@@ -50,6 +50,6 @@ export interface ExchangeInfo {
 
 export interface WatchSymbol {
   type: string;
-  data: BinanceSymbol;
+  symbol: string;
   alertPrice: number;
 }
