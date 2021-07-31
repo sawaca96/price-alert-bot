@@ -4,21 +4,16 @@
       <q-list>
         <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
           <q-item>
-            <q-item-section>
+            <q-item-section class="col-3">
               <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
-              <q-item-label caption class="market">Market name</q-item-label>
-            </q-item-section>
-
-            <!-- <q-item-section>
-              <q-item-label class="chart">line chart</q-item-label>
-              <q-item-label caption class="chart">comming soon</q-item-label>
-            </q-item-section> -->
-
-            <q-item-section side>
               <q-item-label class="price">{{
                 exponentialToNumber(parseFloat(priceMap[watchSymbol.symbol]))
               }}</q-item-label>
               <q-item-label class="change">change</q-item-label>
+            </q-item-section>
+
+            <q-item-section>
+              <v-chart class="chart" :option="option(watchSymbol.symbol)" />
             </q-item-section>
           </q-item>
 
@@ -30,8 +25,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted } from 'vue';
+import { defineComponent, computed, onMounted, reactive } from 'vue';
 import { useStore } from '../store';
+
+import { use } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { LineChart } from 'echarts/charts';
+import { GridComponent } from 'echarts/components';
+import VChart from 'vue-echarts';
+use([CanvasRenderer, LineChart, GridComponent]);
 
 import axios from 'axios';
 
@@ -41,6 +43,9 @@ import { ws, subscribe, createWebSocket } from '../core/binance-websocket';
 
 export default defineComponent({
   name: 'Index',
+  components: {
+    VChart,
+  },
   setup() {
     const store = useStore();
     const watchSymbols = computed(() => {
@@ -49,6 +54,41 @@ export default defineComponent({
     const priceMap = computed(() => {
       return store.state.priceMap;
     });
+    const candleMap: Record<string, (string | number)[][]> = reactive({});
+    const option = (symbol: string) => {
+      const data = candleMap[symbol].map((tick) => {
+        return [tick[0], parseFloat(tick[4] as string)];
+      });
+      return {
+        grid: {
+          left: 10,
+          top: 10,
+          right: 10,
+          bottom: 10,
+        },
+        xAxis: {
+          type: 'time',
+          show: false,
+        },
+        yAxis: {
+          type: 'value',
+          show: false,
+          min: 'dataMin',
+          max: 'dataMax',
+          splitLine: {
+            show: false,
+          },
+        },
+        series: [
+          {
+            name: symbol,
+            type: 'line',
+            symbol: 'none',
+            data: data,
+          },
+        ],
+      };
+    };
 
     const exponentialToNumber = (num: number) => {
       if (num >= 1) return num.toFixed(2);
@@ -77,10 +117,24 @@ export default defineComponent({
 
       let symbols = [];
       for (let watchSymbol of watchSymbols) {
-        const data = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${watchSymbol.symbol}`
+        const price = await axios.get('https://api.binance.com/api/v3/ticker/price', {
+          params: {
+            symbol: watchSymbol.symbol,
+          },
+        });
+        const candle = await axios.get<(string | number)[][]>(
+          'https://api.binance.com/api/v3/klines',
+          {
+            params: {
+              symbol: watchSymbol.symbol,
+              interval: '30m',
+              startTime: Date.now() - 86400000,
+              endTime: Date.now(),
+            },
+          }
         );
-        store.commit('UPDATE_PRICE', data.data);
+        candleMap[watchSymbol.symbol] = candle.data;
+        store.commit('UPDATE_PRICE', price.data);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
         symbols.push(watchSymbol.symbol);
       }
@@ -96,7 +150,13 @@ export default defineComponent({
       };
     });
 
-    return { watchSymbols, priceMap, exponentialToNumber };
+    return { option, watchSymbols, priceMap, exponentialToNumber };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.chart {
+  height: 100px;
+}
+</style>
