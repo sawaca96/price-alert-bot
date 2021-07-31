@@ -9,7 +9,9 @@
               <q-item-label class="price">{{
                 exponentialToNumber(parseFloat(priceMap[watchSymbol.symbol]))
               }}</q-item-label>
-              <q-item-label class="change">change</q-item-label>
+              <q-item-label class="change"
+                >{{ (changeMap[watchSymbol.symbol] * 100).toFixed(2) }}%</q-item-label
+              >
             </q-item-section>
 
             <q-item-section>
@@ -37,7 +39,12 @@ use([CanvasRenderer, LineChart, GridComponent]);
 
 import axios from 'axios';
 
-import { BinanceAggTradeStreams, WatchSymbol } from '../components/models';
+import {
+  BinanceAggTradeStreams,
+  WatchSymbol,
+  BinanceMiniTicker,
+  Binance24HrTicker,
+} from '../components/models';
 import { db, initialize } from '../core/indexed-db';
 import { ws, subscribe, createWebSocket } from '../core/binance-websocket';
 
@@ -54,6 +61,7 @@ export default defineComponent({
     const priceMap = computed(() => {
       return store.state.priceMap;
     });
+    const changeMap: Record<string, number> = reactive({});
     const candleMap: Record<string, (string | number)[][]> = reactive({});
     const option = (symbol: string) => {
       const data = candleMap[symbol].map((tick) => {
@@ -133,7 +141,18 @@ export default defineComponent({
             },
           }
         );
+        let change = await axios.get<Binance24HrTicker>(
+          'https://api.binance.com/api/v3/ticker/24hr',
+          {
+            params: {
+              symbol: watchSymbol.symbol,
+            },
+          }
+        );
         candleMap[watchSymbol.symbol] = candle.data;
+        changeMap[watchSymbol.symbol] =
+          (parseFloat(change.data.lastPrice) - parseFloat(change.data.openPrice)) /
+          parseFloat(change.data.openPrice);
         store.commit('UPDATE_PRICE', price.data);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
         symbols.push(watchSymbol.symbol);
@@ -145,12 +164,21 @@ export default defineComponent({
       createWebSocket();
       await setupWatchSymbols();
       ws.onmessage = function (event) {
-        const data: BinanceAggTradeStreams = JSON.parse(event.data) as BinanceAggTradeStreams;
-        store.commit('UPDATE_PRICE', { symbol: data.s, price: data.p });
+        let data = JSON.parse(event.data) as BinanceAggTradeStreams | BinanceMiniTicker;
+        if (data.e === 'aggTrade') {
+          store.commit('UPDATE_PRICE', {
+            symbol: (data as BinanceAggTradeStreams).s,
+            price: (data as BinanceAggTradeStreams).p,
+          });
+        } else if (data.e === '24hrMiniTicker') {
+          changeMap[data.s] =
+            ((data as BinanceMiniTicker).c - (data as BinanceMiniTicker).o) /
+            (data as BinanceMiniTicker).o;
+        }
       };
     });
 
-    return { option, watchSymbols, priceMap, exponentialToNumber };
+    return { option, watchSymbols, priceMap, changeMap, exponentialToNumber };
   },
 });
 </script>

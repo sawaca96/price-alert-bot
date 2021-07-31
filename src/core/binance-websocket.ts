@@ -15,12 +15,15 @@ const send = function (message: string, interval: number) {
 };
 
 export const subscribe = (symbols: string[]) => {
-  const params = symbols.map((symbol) => {
+  const aggTreadeParams = symbols.map((symbol) => {
     return `${symbol.toLowerCase()}@aggTrade`;
+  });
+  const miniTicker = symbols.map((symbol) => {
+    return `${symbol.toLowerCase()}@miniTicker`;
   });
   const msg = {
     method: 'SUBSCRIBE',
-    params: params,
+    params: [...aggTreadeParams, ...miniTicker],
     id: 1,
   };
   send(JSON.stringify(msg), 1000);

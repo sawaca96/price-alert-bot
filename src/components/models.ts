@@ -33,6 +33,42 @@ export interface BinanceAggTradeStreams {
   M: boolean; // Ignore
 }
 
+export interface BinanceMiniTicker {
+  e: string; // Event type
+  E: number; // Event time
+  s: string; // Symbol
+  c: number; // Close price
+  o: number; // Open price
+  h: number; // High price
+  l: number; // Low price
+  v: number; // Total traded base asset volume
+  q: number; // Total traded quote asset volume
+}
+
+export interface Binance24HrTicker {
+  symbol: string;
+  priceChange: string;
+  priceChangePercent: string;
+  weightedAvgPrice: string;
+  prevClosePrice: string;
+  lastPrice: string;
+  lastQty: string;
+  bidPrice: string;
+  bidQty: string;
+  askPrice: string;
+  askQty: string;
+  openPrice: string;
+  highPrice: string;
+  lowPrice: string;
+  volume: string;
+  quoteVolume: string;
+  openTime: number;
+  closeTime: number;
+  firstId: number;
+  lastId: number;
+  count: number;
+}
+
 interface RateLimit {
   rateLimitType: string;
   interval: string;
