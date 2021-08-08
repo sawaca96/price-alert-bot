@@ -6,9 +6,7 @@
           <q-item>
             <q-item-section class="col-3">
               <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
-              <q-item-label class="price">{{
-                exponentialToNumber(parseFloat(priceMap[watchSymbol.symbol]))
-              }}</q-item-label>
+              <q-item-label class="price">{{ priceMap[watchSymbol.symbol] }}</q-item-label>
               <q-item-label class="change"
                 >{{ (changeMap[watchSymbol.symbol] * 100).toFixed(2) }}%</q-item-label
               >
@@ -27,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted, reactive } from 'vue';
+import { defineComponent, computed, onMounted, reactive, watch } from 'vue';
 import { useStore } from '../store';
 
 import { use } from 'echarts/core';
@@ -46,7 +44,7 @@ import {
   Binance24HrTicker,
 } from '../components/models';
 import { db, initialize } from '../core/indexed-db';
-import { ws, subscribe, createWebSocket } from '../core/binance-websocket';
+import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
 
 export default defineComponent({
   name: 'Index',
@@ -58,15 +56,20 @@ export default defineComponent({
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
     });
-    const priceMap = computed(() => {
-      return store.state.priceMap;
-    });
+    const priceMap: Record<string, string> = reactive({});
     const changeMap: Record<string, number> = reactive({});
     const candleMap: Record<string, (string | number)[][]> = reactive({});
+
     const option = (symbol: string) => {
-      const data = candleMap[symbol].map((tick) => {
-        return [tick[0], parseFloat(tick[4] as string)];
-      });
+      // TODO: watchSymbol을 등록 후 candleMap을 업데이트 하다보니 candleMap[symbol]이 undefined인 경우가 생김
+      let data: (string | number)[][];
+      try {
+        data = candleMap[symbol].map((tick) => {
+          return [tick[0], parseFloat(tick[4] as string)];
+        });
+      } catch (e) {
+        data = [];
+      }
       return {
         grid: {
           left: 10,
@@ -97,7 +100,6 @@ export default defineComponent({
         ],
       };
     };
-
     const exponentialToNumber = (num: number) => {
       if (num >= 1) return num.toFixed(2);
 
@@ -118,46 +120,48 @@ export default defineComponent({
       while (mag--) z += '0';
       return str + z;
     };
+    const updateSymbol = async (watchSymbol: WatchSymbol) => {
+      const price = await axios.get<Record<string, string>>(
+        'https://api.binance.com/api/v3/ticker/price',
+        {
+          params: {
+            symbol: watchSymbol.symbol,
+          },
+        }
+      );
+      const candle = await axios.get<(string | number)[][]>(
+        'https://api.binance.com/api/v3/klines',
+        {
+          params: {
+            symbol: watchSymbol.symbol,
+            interval: '30m',
+            startTime: Date.now() - 86400000,
+            endTime: Date.now(),
+          },
+        }
+      );
+      const change = await axios.get<Binance24HrTicker>(
+        'https://api.binance.com/api/v3/ticker/24hr',
+        {
+          params: {
+            symbol: watchSymbol.symbol,
+          },
+        }
+      );
+      priceMap[watchSymbol.symbol] = exponentialToNumber(parseFloat(price.data.price));
+      candleMap[watchSymbol.symbol] = candle.data;
+      changeMap[watchSymbol.symbol] =
+        (parseFloat(change.data.lastPrice) - parseFloat(change.data.openPrice)) /
+        parseFloat(change.data.openPrice);
+    };
     const setupWatchSymbols = async () => {
       await initialize('price-alert-bot', [store.state.watchlistName]);
       const watchSymbols = (await db.getAll(store.state.watchlistName)) as WatchSymbol[];
       if (!watchSymbols.length) return;
 
-      let symbols = [];
       for (let watchSymbol of watchSymbols) {
-        const price = await axios.get('https://api.binance.com/api/v3/ticker/price', {
-          params: {
-            symbol: watchSymbol.symbol,
-          },
-        });
-        const candle = await axios.get<(string | number)[][]>(
-          'https://api.binance.com/api/v3/klines',
-          {
-            params: {
-              symbol: watchSymbol.symbol,
-              interval: '30m',
-              startTime: Date.now() - 86400000,
-              endTime: Date.now(),
-            },
-          }
-        );
-        let change = await axios.get<Binance24HrTicker>(
-          'https://api.binance.com/api/v3/ticker/24hr',
-          {
-            params: {
-              symbol: watchSymbol.symbol,
-            },
-          }
-        );
-        candleMap[watchSymbol.symbol] = candle.data;
-        changeMap[watchSymbol.symbol] =
-          (parseFloat(change.data.lastPrice) - parseFloat(change.data.openPrice)) /
-          parseFloat(change.data.openPrice);
-        store.commit('UPDATE_PRICE', price.data);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
-        symbols.push(watchSymbol.symbol);
       }
-      subscribe(symbols);
     };
 
     onMounted(async () => {
@@ -166,10 +170,7 @@ export default defineComponent({
       ws.onmessage = function (event) {
         let data = JSON.parse(event.data) as BinanceAggTradeStreams | BinanceMiniTicker;
         if (data.e === 'aggTrade') {
-          store.commit('UPDATE_PRICE', {
-            symbol: (data as BinanceAggTradeStreams).s,
-            price: (data as BinanceAggTradeStreams).p,
-          });
+          priceMap[data.s] = exponentialToNumber(parseFloat((data as BinanceAggTradeStreams).p));
         } else if (data.e === '24hrMiniTicker') {
           changeMap[data.s] =
             ((data as BinanceMiniTicker).c - (data as BinanceMiniTicker).o) /
@@ -177,7 +178,27 @@ export default defineComponent({
         }
       };
     });
-
+    watch(
+      () => [...store.state.watchSymbols],
+      async (newVal, prevVal) => {
+        const AddedSymbols = newVal.filter((x) => !prevVal.includes(x));
+        const DeletedSymbols = prevVal.filter((x) => !newVal.includes(x));
+        if (AddedSymbols.length) {
+          for (let watchSymbol of AddedSymbols) {
+            await updateSymbol(watchSymbol);
+            subscribe([watchSymbol.symbol]);
+          }
+        }
+        if (DeletedSymbols.length) {
+          for (let watchSymbol of DeletedSymbols) {
+            unsubscribe([watchSymbol.symbol]);
+            delete priceMap[watchSymbol.symbol];
+            delete changeMap[watchSymbol.symbol];
+            delete candleMap[watchSymbol.symbol];
+          }
+        }
+      }
+    );
     return { option, watchSymbols, priceMap, changeMap, exponentialToNumber };
   },
 });

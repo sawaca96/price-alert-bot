@@ -35,7 +35,6 @@ import { useStore } from '../store';
 import axios from 'axios';
 
 import { ExchangeInfo, WatchSymbol } from './models';
-import { subscribe } from '../core/binance-websocket';
 import { db, IDBError } from '../core/indexed-db';
 
 const searchSymbol = () => {
@@ -86,13 +85,8 @@ export default defineComponent({
           symbol: symbol,
           alertPrice: -1,
         };
-        await db.add(store.state.watchlistName, watchSymbol, symbol);
-        const data = await axios.get(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
-        );
-        store.commit('UPDATE_PRICE', data.data);
+        await db.add(store.state.watchlistName, watchSymbol, watchSymbol.symbol);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
-        subscribe([symbol]);
       } catch (e) {
         const { message } = e as IDBError;
         if (message === 'Key already exists in the object store.') {
