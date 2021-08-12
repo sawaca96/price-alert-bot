@@ -11,10 +11,6 @@
                 >{{ (changeMap[watchSymbol.symbol] * 100).toFixed(2) }}%</q-item-label
               >
             </q-item-section>
-
-            <q-item-section>
-              <v-chart class="chart" :option="option(watchSymbol.symbol)" />
-            </q-item-section>
           </q-item>
 
           <q-separator spaced inset />
@@ -27,13 +23,6 @@
 <script lang="ts">
 import { defineComponent, computed, onMounted, reactive, watch } from 'vue';
 import { useStore } from '../store';
-
-import { use } from 'echarts/core';
-import { CanvasRenderer } from 'echarts/renderers';
-import { LineChart } from 'echarts/charts';
-import { GridComponent } from 'echarts/components';
-import VChart from 'vue-echarts';
-use([CanvasRenderer, LineChart, GridComponent]);
 
 import axios from 'axios';
 
@@ -48,9 +37,6 @@ import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-web
 
 export default defineComponent({
   name: 'Index',
-  components: {
-    VChart,
-  },
   setup() {
     const store = useStore();
     const watchSymbols = computed(() => {
@@ -58,48 +44,7 @@ export default defineComponent({
     });
     const priceMap: Record<string, string> = reactive({});
     const changeMap: Record<string, number> = reactive({});
-    const candleMap: Record<string, (string | number)[][]> = reactive({});
 
-    const option = (symbol: string) => {
-      // TODO: watchSymbol을 등록 후 candleMap을 업데이트 하다보니 candleMap[symbol]이 undefined인 경우가 생김
-      let data: (string | number)[][];
-      try {
-        data = candleMap[symbol].map((tick) => {
-          return [tick[0], parseFloat(tick[4] as string)];
-        });
-      } catch (e) {
-        data = [];
-      }
-      return {
-        grid: {
-          left: 10,
-          top: 10,
-          right: 10,
-          bottom: 10,
-        },
-        xAxis: {
-          type: 'time',
-          show: false,
-        },
-        yAxis: {
-          type: 'value',
-          show: false,
-          min: 'dataMin',
-          max: 'dataMax',
-          splitLine: {
-            show: false,
-          },
-        },
-        series: [
-          {
-            name: symbol,
-            type: 'line',
-            symbol: 'none',
-            data: data,
-          },
-        ],
-      };
-    };
     const exponentialToNumber = (num: number) => {
       if (num >= 1) return num.toFixed(2);
 
@@ -129,17 +74,6 @@ export default defineComponent({
           },
         }
       );
-      const candle = await axios.get<(string | number)[][]>(
-        'https://api.binance.com/api/v3/klines',
-        {
-          params: {
-            symbol: watchSymbol.symbol,
-            interval: '30m',
-            startTime: Date.now() - 86400000,
-            endTime: Date.now(),
-          },
-        }
-      );
       const change = await axios.get<Binance24HrTicker>(
         'https://api.binance.com/api/v3/ticker/24hr',
         {
@@ -149,7 +83,6 @@ export default defineComponent({
         }
       );
       priceMap[watchSymbol.symbol] = exponentialToNumber(parseFloat(price.data.price));
-      candleMap[watchSymbol.symbol] = candle.data;
       changeMap[watchSymbol.symbol] =
         (parseFloat(change.data.lastPrice) - parseFloat(change.data.openPrice)) /
         parseFloat(change.data.openPrice);
@@ -194,12 +127,11 @@ export default defineComponent({
             unsubscribe([watchSymbol.symbol]);
             delete priceMap[watchSymbol.symbol];
             delete changeMap[watchSymbol.symbol];
-            delete candleMap[watchSymbol.symbol];
           }
         }
       }
     );
-    return { option, watchSymbols, priceMap, changeMap, exponentialToNumber };
+    return { watchSymbols, priceMap, changeMap, exponentialToNumber };
   },
 });
 </script>
