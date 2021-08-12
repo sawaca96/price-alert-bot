@@ -16,7 +16,8 @@ export const initialize = async (database: string, tableNames: string[]) => {
           if (db.objectStoreNames.contains(tableName)) {
             continue;
           }
-          db.createObjectStore(tableName, { autoIncrement: false });
+          const store = db.createObjectStore(tableName, { autoIncrement: false });
+          store.createIndex('position', 'position');
         }
       },
     });
