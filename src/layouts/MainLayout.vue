@@ -11,7 +11,14 @@
           class="text-grey"
           @click="showSearch = true"
         />
-        <q-btn flat dense icon="sort" aria-label="sort" class="text-grey" />
+        <q-btn
+          flat
+          dense
+          icon="sort"
+          aria-label="sort"
+          class="text-grey"
+          @click="showOrder = true"
+        />
         <q-btn
           flat
           dense
@@ -28,6 +35,7 @@
     </q-page-container>
     <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
     <SettingDialog v-model:showSetting="showSetting" v-if="showSetting" />
+    <OrderDialog v-model:showOrder="showOrder" v-if="showOrder" />
   </q-layout>
 </template>
 
@@ -36,14 +44,16 @@ import { defineComponent, ref } from 'vue';
 
 import SearchDialog from '../components/SearchDialog.vue';
 import SettingDialog from '../components/SettingDialog.vue';
+import OrderDialog from '../components/OrderDialog.vue';
 
 export default defineComponent({
   name: 'MainLayout',
-  components: { SearchDialog, SettingDialog },
+  components: { SearchDialog, SettingDialog, OrderDialog },
   setup() {
     const showSearch = ref(false);
     const showSetting = ref(false);
-    return { showSearch, showSetting };
+    const showOrder = ref(false);
+    return { showSearch, showSetting, showOrder };
   },
 });
 </script>
