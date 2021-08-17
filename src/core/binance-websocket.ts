@@ -30,12 +30,15 @@ export const subscribe = (symbols: string[]) => {
 };
 
 export const unsubscribe = (symbols: string[]) => {
-  const params = symbols.map((symbol) => {
+  const aggTreadeParams = symbols.map((symbol) => {
     return `${symbol.toLowerCase()}@aggTrade`;
+  });
+  const miniTicker = symbols.map((symbol) => {
+    return `${symbol.toLowerCase()}@miniTicker`;
   });
   const msg = {
     method: 'UNSUBSCRIBE',
-    params: params,
+    params: [...aggTreadeParams, ...miniTicker],
     id: 1,
   };
   send(JSON.stringify(msg), 1000);
