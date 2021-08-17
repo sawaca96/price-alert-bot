@@ -7,7 +7,12 @@
             <q-item-section class="col-3">
               <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
               <q-item-label class="price">{{ priceMap[watchSymbol.symbol] }}</q-item-label>
-              <q-item-label class="change"
+              <q-item-label
+                class="change"
+                :class="{
+                  up: changeMap[watchSymbol.symbol] > 0,
+                  down: changeMap[watchSymbol.symbol] < 0,
+                }"
                 >{{ (changeMap[watchSymbol.symbol] * 100).toFixed(2) }}%</q-item-label
               >
             </q-item-section>
@@ -120,12 +125,14 @@ export default defineComponent({
       async (newVal, prevVal) => {
         const AddedSymbols = newVal.filter((x) => !prevVal.includes(x));
         const DeletedSymbols = prevVal.filter((x) => !newVal.includes(x));
+
         if (AddedSymbols.length) {
           for (let watchSymbol of AddedSymbols) {
             await updateSymbol(watchSymbol);
             subscribe([watchSymbol.symbol]);
           }
         }
+
         if (DeletedSymbols.length) {
           for (let watchSymbol of DeletedSymbols) {
             unsubscribe([watchSymbol.symbol]);
@@ -141,7 +148,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.chart {
-  height: 100px;
+.change {
+  &.up {
+    color: green;
+  }
+  &.down {
+    color: red;
+  }
 }
 </style>
