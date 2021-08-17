@@ -83,9 +83,10 @@ export default defineComponent({
         }
       );
       priceMap[watchSymbol.symbol] = exponentialToNumber(parseFloat(price.data.price));
-      changeMap[watchSymbol.symbol] =
-        (parseFloat(change.data.lastPrice) - parseFloat(change.data.openPrice)) /
-        parseFloat(change.data.openPrice);
+      const openPrice = parseFloat(change.data.openPrice);
+      const lastPrice = parseFloat(change.data.lastPrice);
+      const changePercent = openPrice === 0 ? 0 : (lastPrice - openPrice) / openPrice;
+      changeMap[watchSymbol.symbol] = changePercent;
     };
     const setupWatchSymbols = async () => {
       await initialize('price-alert-bot', [store.state.watchlistName]);
