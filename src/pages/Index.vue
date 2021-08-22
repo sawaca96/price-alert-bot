@@ -49,6 +49,7 @@ import {
   Binance24HrTicker,
   draggableEvent,
 } from '../components/models';
+import { exponentialToNumber } from '../utils/exponential-to-number';
 
 import draggable from 'vuedraggable';
 
@@ -65,26 +66,6 @@ export default defineComponent({
     const priceMap: Record<string, string> = reactive({});
     const changeMap: Record<string, number> = reactive({});
 
-    const exponentialToNumber = (num: number) => {
-      if (num >= 1) return num.toFixed(2);
-
-      let data = String(num).split(/[eE]/);
-      if (data.length == 1) return data[0];
-
-      let z = '',
-        sign = num < 0 ? '-' : '',
-        str = data[0].replace('.', ''),
-        mag = Number(data[1]) + 1;
-
-      if (mag < 0) {
-        z = sign + '0.';
-        while (mag++) z += '0';
-        return z + str.replace(/^-/, '');
-      }
-      mag -= str.length;
-      while (mag--) z += '0';
-      return str + z;
-    };
     const changePosition = async (e: Record<string, draggableEvent>) => {
       const moved = e.moved;
       const movedSymbol = moved.element;
@@ -171,7 +152,7 @@ export default defineComponent({
         }
       }
     );
-    return { watchSymbols, priceMap, changeMap, exponentialToNumber, changePosition };
+    return { watchSymbols, priceMap, changeMap, changePosition };
   },
 });
 </script>
