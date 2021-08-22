@@ -1,5 +1,5 @@
 import { IDBPDatabase, openDB } from 'idb';
-
+import { WatchSymbol } from '../components/models';
 export interface IDBError {
   code: number;
   message: string;
@@ -24,4 +24,35 @@ export const initialize = async (database: string, tableNames: string[]) => {
   } catch (error) {
     return false;
   }
+};
+
+export const updatePosition = async (
+  store: string,
+  movedSymbol: WatchSymbol,
+  oldPosition: number,
+  newPosition: number
+) => {
+  const positionRange =
+    oldPosition < newPosition
+      ? IDBKeyRange.bound(oldPosition, newPosition, true)
+      : IDBKeyRange.bound(newPosition, oldPosition, false, true);
+  const positionObjects = db.transaction(store, 'readwrite').store.index('position');
+  let positionCurosr =
+    oldPosition < newPosition
+      ? await positionObjects.openCursor(positionRange)
+      : await positionObjects.openCursor(positionRange, 'prev');
+  while (positionCurosr) {
+    const symbol = { ...positionCurosr.value } as WatchSymbol;
+    if (oldPosition < newPosition) symbol.position -= 1;
+    else symbol.position += 1;
+    await positionCurosr.update(symbol);
+    positionCurosr = await positionCurosr.continue();
+  }
+
+  const symbolCursor = await db
+    .transaction(store, 'readwrite')
+    .store.openCursor(IDBKeyRange.only(movedSymbol.symbol));
+  const symbol = symbolCursor?.value as WatchSymbol;
+  symbol.position = newPosition;
+  await symbolCursor?.update(symbol);
 };

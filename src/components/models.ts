@@ -90,3 +90,9 @@ export interface WatchSymbol {
   alertPrice: number;
   position: number;
 }
+
+export interface draggableEvent {
+  element: WatchSymbol;
+  newIndex: number;
+  oldIndex: number;
+}

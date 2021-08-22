@@ -2,24 +2,34 @@
   <q-page class="q-mt-sm">
     <div class="list">
       <q-list>
-        <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
-          <q-item>
-            <q-item-section class="col-3">
-              <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
-              <q-item-label class="price">{{ priceMap[watchSymbol.symbol] }}</q-item-label>
-              <q-item-label
-                class="change"
-                :class="{
-                  up: changeMap[watchSymbol.symbol] > 0,
-                  down: changeMap[watchSymbol.symbol] < 0,
-                }"
-                >{{ (changeMap[watchSymbol.symbol] * 100).toFixed(2) }}%</q-item-label
-              >
-            </q-item-section>
-          </q-item>
+        <draggable
+          :modelValue="watchSymbols"
+          @change="changePosition"
+          handle=".handle"
+          item-key="symbol"
+          tag="transition-group"
+          :component-data="{ name: 'fade' }"
+        >
+          <template #item="{ element }">
+            <q-item class="justify-center">
+              <q-item-section class="col-4">
+                <q-item-label class="name">{{ element.symbol }}</q-item-label>
+                <q-item-label class="price">{{ priceMap[element.symbol] }}</q-item-label>
+                <q-item-label
+                  class="change"
+                  :class="{
+                    up: changeMap[element.symbol] > 0,
+                    down: changeMap[element.symbol] < 0,
+                  }"
+                  >{{ (changeMap[element.symbol] * 100).toFixed(2) }}%</q-item-label
+                >
+              </q-item-section>
+              <q-btn flat dense icon="reorder" aria-label="reorder" class="text-grey handle" />
 
-          <q-separator spaced inset />
-        </div>
+              <q-separator spaced inset />
+            </q-item>
+          </template>
+        </draggable>
       </q-list>
     </div>
   </q-page>
@@ -30,18 +40,23 @@ import { defineComponent, computed, onMounted, reactive, watch } from 'vue';
 import { useStore } from '../store';
 
 import axios from 'axios';
-
+import { db, initialize, updatePosition } from '../core/indexed-db';
+import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
 import {
   BinanceAggTradeStreams,
   WatchSymbol,
   BinanceMiniTicker,
   Binance24HrTicker,
+  draggableEvent,
 } from '../components/models';
-import { db, initialize } from '../core/indexed-db';
-import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
+
+import draggable from 'vuedraggable';
 
 export default defineComponent({
   name: 'Index',
+  components: {
+    draggable, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+  },
   setup() {
     const store = useStore();
     const watchSymbols = computed(() => {
@@ -69,6 +84,20 @@ export default defineComponent({
       mag -= str.length;
       while (mag--) z += '0';
       return str + z;
+    };
+    const changePosition = async (e: Record<string, draggableEvent>) => {
+      const moved = e.moved;
+      const movedSymbol = moved.element;
+      const oldPosition = moved.oldIndex;
+      const newPosition = moved.newIndex;
+
+      store.commit('UPDATE_WATCH_SYMBOL_POSITION', { newPosition, oldPosition });
+      await updatePosition(
+        store.state.watchlistName,
+        movedSymbol,
+        oldPosition + 1,
+        newPosition + 1
+      );
     };
     const updateSymbol = async (watchSymbol: WatchSymbol) => {
       const price = await axios.get<Record<string, string>>(
@@ -142,7 +171,7 @@ export default defineComponent({
         }
       }
     );
-    return { watchSymbols, priceMap, changeMap, exponentialToNumber };
+    return { watchSymbols, priceMap, changeMap, exponentialToNumber, changePosition };
   },
 });
 </script>

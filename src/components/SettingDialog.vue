@@ -15,10 +15,6 @@
                 <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
               </q-item-section>
 
-              <q-item-section>
-                <q-btn flat dense icon="reorder" aria-label="reorder" class="text-grey" />
-              </q-item-section>
-
               <q-item-section side>
                 <q-btn
                   flat

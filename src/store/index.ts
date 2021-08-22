@@ -37,6 +37,13 @@ export default store(function (/* { ssrContext } */) {
       exchange: 'BINANCE',
     }),
     mutations: {
+      UPDATE_WATCH_SYMBOL_POSITION(
+        state: StateInterface,
+        { newPosition, oldPosition }: Record<string, number>
+      ) {
+        const symbol = state.watchSymbols.splice(oldPosition, 1);
+        state.watchSymbols.splice(newPosition, 0, symbol[0]);
+      },
       DELETE_WATCH_SYMBOLS(state: StateInterface, symbol: string) {
         state.watchSymbols = state.watchSymbols.filter((watchSymbol) => {
           if (watchSymbol.symbol === symbol) return false;
