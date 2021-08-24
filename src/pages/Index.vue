@@ -8,26 +8,27 @@
           handle=".handle"
           item-key="symbol"
           tag="transition-group"
-          :component-data="{ name: 'fade' }"
+          animation="200"
         >
           <template #item="{ element }">
-            <q-item class="justify-center">
-              <q-item-section class="col-4">
-                <q-item-label class="name">{{ element.symbol }}</q-item-label>
-                <q-item-label class="price">{{ priceMap[element.symbol] }}</q-item-label>
-                <q-item-label
-                  class="change"
-                  :class="{
-                    up: changeMap[element.symbol] > 0,
-                    down: changeMap[element.symbol] < 0,
-                  }"
-                  >{{ (changeMap[element.symbol] * 100).toFixed(2) }}%</q-item-label
-                >
-              </q-item-section>
-              <q-btn flat dense icon="reorder" aria-label="reorder" class="text-grey handle" />
+            <q-card class="my-card q-ma-md">
+              <q-item class="q-pa-md">
+                <q-item-section>
+                  <q-item-label class="name">{{ element.symbol }}</q-item-label>
+                  <q-item-label class="price">{{ priceMap[element.symbol] }}</q-item-label>
+                  <q-item-label
+                    class="change"
+                    :class="{
+                      up: changeMap[element.symbol] > 0,
+                      down: changeMap[element.symbol] < 0,
+                    }"
+                    >{{ (changeMap[element.symbol] * 100).toFixed(2) }}%</q-item-label
+                  >
+                </q-item-section>
 
-              <q-separator spaced inset />
-            </q-item>
+                <q-btn flat dense icon="reorder" aria-label="reorder" class="text-grey handle" />
+              </q-item>
+            </q-card>
           </template>
         </draggable>
       </q-list>
@@ -158,12 +159,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.change {
-  &.up {
-    color: green;
+.list {
+  color: #adbac7;
+  .my-card {
+    background-color: #22272e;
+    // background-color: #2d333b;
   }
-  &.down {
-    color: red;
+  .change {
+    &.up {
+      color: green;
+    }
+    &.down {
+      color: red;
+    }
   }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <q-dialog :modelValue="showSetting" @update:modelValue="toggleSetting">
-    <q-card>
+  <q-dialog :modelValue="showSetting" @update:modelValue="toggleSetting" class="dialog">
+    <q-card class="my-card">
       <q-card-section>
-        <div class="text-h6">Setting</div>
+        <div class="text-h6 header">Setting</div>
       </q-card-section>
 
       <q-separator />
@@ -12,7 +12,7 @@
           <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
             <q-item>
               <q-item-section>
-                <q-item-label class="name">{{ watchSymbol.symbol }}</q-item-label>
+                <q-item-label class="symbol">{{ watchSymbol.symbol }}</q-item-label>
               </q-item-section>
 
               <q-item-section side>
@@ -35,7 +35,7 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn flat label="Decline" color="primary" v-close-popup />
+        <q-btn flat label="Decline" class="text-amber" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -72,3 +72,15 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.my-card {
+  background-color: #22272e;
+  .symbol {
+    color: #adbac7;
+  }
+  .header {
+    color: rgb(205 217 229 / 70%);
+  }
+}
+</style>

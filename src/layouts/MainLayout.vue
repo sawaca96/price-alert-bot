@@ -1,8 +1,8 @@
 <template>
   <q-layout view="hHh lpr fFf">
-    <q-header bordered class="bg-white">
+    <q-header bordered class="header">
       <q-toolbar>
-        <q-toolbar-title class="text-green-8"> Price Alert Bot </q-toolbar-title>
+        <q-toolbar-title class="title"> Price Alert Bot </q-toolbar-title>
         <q-btn
           flat
           dense
@@ -22,7 +22,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container>
+    <q-page-container class="container">
       <router-view />
     </q-page-container>
     <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
@@ -46,3 +46,15 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.header {
+  background-color: #2d333b;
+}
+.title {
+  color: rgb(205 217 229 / 70%);
+}
+.container {
+  background-color: #1c2128;
+}
+</style>
