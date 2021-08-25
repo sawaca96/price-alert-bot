@@ -2,48 +2,29 @@
   <q-layout class="layout" view="hHh lpr fFf">
     <q-header bordered class="header">
       <q-toolbar>
-        <q-toolbar-title class="title"> Price Alert Bot </q-toolbar-title>
-        <q-btn
-          flat
-          dense
-          icon="search"
-          aria-label="search"
-          class="text-grey"
-          @click="showSearch = true"
-        />
-        <q-btn
-          flat
-          dense
-          icon="settings"
-          aria-label="settings"
-          class="text-grey"
-          @click="showSetting = true"
-        />
+        <q-toolbar-title class="title">
+          <router-link to="/">Price Alert Bot</router-link>
+        </q-toolbar-title>
+        <router-link to="search"
+          ><q-btn flat dense icon="search" aria-label="search" class="text-grey"
+        /></router-link>
+        <router-link to="setting"
+          ><q-btn flat dense icon="settings" aria-label="settings" class="text-grey"
+        /></router-link>
       </q-toolbar>
     </q-header>
 
     <q-page-container class="container">
       <router-view />
     </q-page-container>
-    <SearchDialog v-model:showSearch="showSearch" v-if="showSearch" />
-    <SettingDialog v-model:showSetting="showSetting" v-if="showSetting" />
   </q-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-
-import SearchDialog from '../components/SearchDialog.vue';
-import SettingDialog from '../components/SettingDialog.vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'MainLayout',
-  components: { SearchDialog, SettingDialog },
-  setup() {
-    const showSearch = ref(false);
-    const showSetting = ref(false);
-    return { showSearch, showSetting };
-  },
 });
 </script>
 
@@ -51,6 +32,10 @@ export default defineComponent({
 .layout {
   width: 300px;
   height: 600px;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 .header {
   background-color: #2d333b;

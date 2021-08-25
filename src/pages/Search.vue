@@ -1,36 +1,36 @@
 <template>
-  <q-dialog :modelValue="showSearch" @update:modelValue="toggleSearch">
-    <q-card class="my-card">
-      <q-card-section>
-        <div class="text-h6 header">Search Symbol</div>
-      </q-card-section>
+  <q-card class="my-card">
+    <q-card-section>
+      <div class="text-h6 header">Search Symbol</div>
+    </q-card-section>
 
-      <q-separator />
+    <q-separator />
 
-      <q-card-section class="q-pt-none">
-        <q-input dark dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
-      </q-card-section>
+    <q-card-section class="q-pt-none">
+      <q-input dark dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
+    </q-card-section>
 
-      <q-separator />
+    <q-separator />
 
-      <q-card-section style="max-height: 50vh" class="scroll">
-        <p
-          class="symbol"
-          v-for="symbol in autocompleteSymbols"
-          :key="symbol"
-          @click="addSymbol(exchange, symbol)"
-        >
-          {{ symbol }}
-        </p>
-      </q-card-section>
+    <q-card-section style="max-height: 50vh" class="scroll">
+      <p
+        class="symbol"
+        v-for="symbol in autocompleteSymbols"
+        :key="symbol"
+        @click="addSymbol(exchange, symbol)"
+      >
+        {{ symbol }}
+      </p>
+    </q-card-section>
 
-      <q-separator />
+    <q-separator />
 
-      <q-card-actions align="right">
+    <q-card-actions align="right">
+      <router-link to="/">
         <q-btn flat label="Decline" class="text-amber" v-close-popup />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+      </router-link>
+    </q-card-actions>
+  </q-card>
 </template>
 
 <script lang="ts">
@@ -39,7 +39,7 @@ import { useStore } from '../store';
 
 import axios from 'axios';
 
-import { ExchangeInfo, WatchSymbol } from './models';
+import { ExchangeInfo, WatchSymbol } from '../components/models';
 import { db, IDBError } from '../core/indexed-db';
 
 const searchSymbol = () => {
@@ -67,22 +67,13 @@ const searchSymbol = () => {
 };
 
 export default defineComponent({
-  props: {
-    showSearch: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  setup(_, { emit }) {
+  setup() {
     const store = useStore();
     const exchange = computed(() => {
       return store.state.exchange;
     });
     const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchSymbol();
 
-    const toggleSearch = (e: Event) => {
-      emit('update:showSearch', e);
-    };
     const addSymbol = async (exchange: string, symbol: string) => {
       try {
         const watchSymbol: WatchSymbol = {
@@ -105,7 +96,7 @@ export default defineComponent({
       await getSymbols(exchange.value);
     });
 
-    return { exchange, symbolName, autocompleteSymbols, toggleSearch, autocomplete, addSymbol };
+    return { exchange, symbolName, autocompleteSymbols, autocomplete, addSymbol };
   },
 });
 </script>
@@ -113,6 +104,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .my-card {
   background-color: #22272e;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
   .symbol {
     color: #adbac7;
   }
