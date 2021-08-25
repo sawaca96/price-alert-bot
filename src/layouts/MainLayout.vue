@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpr fFf">
+  <q-layout class="layout" view="hHh lpr fFf">
     <q-header bordered class="header">
       <q-toolbar>
         <q-toolbar-title class="title"> Price Alert Bot </q-toolbar-title>
@@ -48,6 +48,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.layout {
+  width: 300px;
+  height: 600px;
+}
 .header {
   background-color: #2d333b;
 }

@@ -8,7 +8,7 @@
       <q-separator />
 
       <q-card-section class="q-pt-none">
-        <q-input dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
+        <q-input dark dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
       </q-card-section>
 
       <q-separator />
