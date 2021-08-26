@@ -37,6 +37,9 @@ export default store(function (/* { ssrContext } */) {
       exchange: 'BINANCE',
     }),
     mutations: {
+      SET_WATCH_SYMBOLS(state: StateInterface, symbols: WatchSymbol[]) {
+        state.watchSymbols = symbols;
+      },
       UPDATE_WATCH_SYMBOL_POSITION(
         state: StateInterface,
         { newPosition, oldPosition }: Record<string, number>

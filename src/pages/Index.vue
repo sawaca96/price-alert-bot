@@ -37,12 +37,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted, reactive, watch } from 'vue';
+import { defineComponent, computed, onMounted, reactive } from 'vue';
 import { useStore } from '../store';
 
 import axios from 'axios';
 import { db, initialize, updatePosition } from '../core/indexed-db';
-import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
+import { ws, subscribe, createWebSocket } from '../core/binance-websocket';
 import {
   BinanceAggTradeStreams,
   WatchSymbol,
@@ -104,22 +104,26 @@ export default defineComponent({
       const changePercent = openPrice === 0 ? 0 : (lastPrice - openPrice) / openPrice;
       changeMap[watchSymbol.symbol] = changePercent;
     };
-    const setupWatchSymbols = async () => {
+    const fetchWatchSymbols = async () => {
       await initialize('price-alert-bot', [store.state.watchlistName]);
       const watchSymbols = (await db.getAllFromIndex(
         store.state.watchlistName,
         'position'
       )) as WatchSymbol[];
       if (!watchSymbols.length) return;
-
-      for (let watchSymbol of watchSymbols) {
-        store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
-      }
+      store.commit('SET_WATCH_SYMBOLS', watchSymbols);
     };
 
     onMounted(async () => {
       createWebSocket();
-      await setupWatchSymbols();
+      await fetchWatchSymbols();
+      let promises = [];
+      for (let watchSymbol of watchSymbols.value) {
+        promises.push(updateSymbol(watchSymbol));
+      }
+      await Promise.all(promises);
+      const symbols = watchSymbols.value.map((x) => x.symbol);
+      subscribe(symbols);
       ws.onmessage = function (event) {
         let data = JSON.parse(event.data) as BinanceAggTradeStreams | BinanceMiniTicker;
         if (data.e === 'aggTrade') {
@@ -131,28 +135,6 @@ export default defineComponent({
         }
       };
     });
-    watch(
-      () => [...store.state.watchSymbols],
-      async (newVal, prevVal) => {
-        const AddedSymbols = newVal.filter((x) => !prevVal.includes(x));
-        const DeletedSymbols = prevVal.filter((x) => !newVal.includes(x));
-
-        if (AddedSymbols.length) {
-          for (let watchSymbol of AddedSymbols) {
-            await updateSymbol(watchSymbol);
-            subscribe([watchSymbol.symbol]);
-          }
-        }
-
-        if (DeletedSymbols.length) {
-          for (let watchSymbol of DeletedSymbols) {
-            unsubscribe([watchSymbol.symbol]);
-            delete priceMap[watchSymbol.symbol];
-            delete changeMap[watchSymbol.symbol];
-          }
-        }
-      }
-    );
     return { watchSymbols, priceMap, changeMap, changePosition };
   },
 });
