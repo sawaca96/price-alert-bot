@@ -37,12 +37,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted, reactive } from 'vue';
+import { defineComponent, computed, onMounted, reactive, onUnmounted } from 'vue';
 import { useStore } from '../store';
 
 import axios from 'axios';
 import { db, initialize, updatePosition } from '../core/indexed-db';
-import { ws, subscribe, createWebSocket } from '../core/binance-websocket';
+import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
 import {
   BinanceAggTradeStreams,
   WatchSymbol,
@@ -134,6 +134,10 @@ export default defineComponent({
             (data as BinanceMiniTicker).o;
         }
       };
+    });
+    onUnmounted(() => {
+      const symbols = watchSymbols.value.map((x) => x.symbol);
+      unsubscribe(symbols);
     });
     return { watchSymbols, priceMap, changeMap, changePosition };
   },
