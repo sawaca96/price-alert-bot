@@ -75,6 +75,8 @@ export default defineComponent({
     const { symbolName, autocompleteSymbols, getSymbols, autocomplete } = searchSymbol();
 
     const addSymbol = async (exchange: string, symbol: string) => {
+      if (store.state.watchSymbols.length === 20) return alert('Maximum number of symbol is 20.');
+
       try {
         const watchSymbol: WatchSymbol = {
           type: exchange,
