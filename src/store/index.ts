@@ -47,6 +47,12 @@ export default store(function (/* { ssrContext } */) {
         const symbol = state.watchSymbols.splice(oldPosition, 1);
         state.watchSymbols.splice(newPosition, 0, symbol[0]);
       },
+      UPDATE_WATCH_SYMBOL_ALERT_PRICE(
+        state: StateInterface,
+        { symbolIndex, alertPrice }: Record<string, number>
+      ) {
+        state.watchSymbols[symbolIndex].alertPrice = alertPrice;
+      },
       DELETE_WATCH_SYMBOLS(state: StateInterface, symbol: string) {
         state.watchSymbols = state.watchSymbols.filter((watchSymbol) => {
           if (watchSymbol.symbol === symbol) return false;

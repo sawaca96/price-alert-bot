@@ -56,3 +56,16 @@ export const updatePosition = async (
   symbol.position = newPosition;
   await symbolCursor?.update(symbol);
 };
+
+export const update = async <K extends keyof WatchSymbol>(
+  store: string,
+  key: K,
+  watchSymbol: WatchSymbol
+) => {
+  const cursor = await db
+    .transaction(store, 'readwrite')
+    .store.openCursor(IDBKeyRange.only(watchSymbol.symbol));
+  const cursorValue = cursor?.value as WatchSymbol;
+  cursorValue[key] = watchSymbol[key];
+  await cursor?.update(cursorValue);
+};

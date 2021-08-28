@@ -7,14 +7,24 @@
     </q-card>
 
     <q-list class="q-pa-md">
-      <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
+      <div class="item-wrap" v-for="(watchSymbol, index) in watchSymbols" :key="watchSymbol.symbol">
         <q-card class="my-card q-mb-md">
-          <q-item class="q-pa-md">
+          <q-item class="q-pa-md row content-between">
             <q-item-section>
               <q-item-label class="symbol text-weight-bold">{{ watchSymbol.symbol }}</q-item-label>
             </q-item-section>
 
-            <q-item-section side>
+            <q-item-section class="content-center">
+              <q-input
+                dark
+                dense
+                type="number"
+                :model-value="watchSymbol.alertPrice"
+                @change="updateAlertPrice($event, index, watchSymbol)"
+              />
+            </q-item-section>
+
+            <q-item-section class="content-end">
               <q-btn
                 flat
                 dense
@@ -29,7 +39,7 @@
       </div>
       <q-card-actions align="right">
         <router-link to="/">
-          <q-btn flat label="Decline" class="text-amber" v-close-popup />
+          <q-btn flat label="close" class="text-amber" />
         </router-link>
       </q-card-actions>
     </q-list>
@@ -41,7 +51,7 @@ import { defineComponent, computed } from 'vue';
 import { useStore } from '../store';
 
 import { WatchSymbol } from '../types/price-alert-bot';
-import { db } from '../core/indexed-db';
+import { db, update } from '../core/indexed-db';
 
 export default defineComponent({
   setup() {
@@ -54,7 +64,14 @@ export default defineComponent({
       await db.delete(store.state.watchlistName, watchSymbol.symbol);
       store.commit('DELETE_WATCH_SYMBOLS', watchSymbol.symbol);
     };
-    return { watchSymbols, deleteSymbol };
+    const updateAlertPrice = async (e: string, symbolIndex: number, watchSymbol: WatchSymbol) => {
+      // TODO: why value is string?
+      const alertPrice = parseFloat(e);
+      store.commit('UPDATE_WATCH_SYMBOL_ALERT_PRICE', { symbolIndex, alertPrice });
+      await update(store.state.watchlistName, 'alertPrice', watchSymbol);
+    };
+
+    return { watchSymbols, updateAlertPrice, deleteSymbol };
   },
 });
 </script>

@@ -25,7 +25,7 @@
 
       <q-card-actions align="right">
         <router-link to="/">
-          <q-btn flat label="Decline" class="text-amber" v-close-popup />
+          <q-btn flat label="close" class="text-amber" />
         </router-link>
       </q-card-actions>
     </q-list>
@@ -81,7 +81,7 @@ export default defineComponent({
         const watchSymbol: WatchSymbol = {
           type: exchange,
           symbol: symbol,
-          alertPrice: -1,
+          alertPrice: 0,
           position: store.state.watchSymbols.length + 1,
         };
         await db.add(store.state.watchlistName, watchSymbol, watchSymbol.symbol);
