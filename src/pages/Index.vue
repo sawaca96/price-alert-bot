@@ -1,7 +1,7 @@
 <template>
-  <q-page class="q-mt-sm">
+  <q-page>
     <div class="list">
-      <q-list>
+      <q-list class="q-pa-md">
         <draggable
           :modelValue="watchSymbols"
           @change="changePosition"
@@ -11,7 +11,7 @@
           animation="200"
         >
           <template #item="{ element }">
-            <q-card class="my-card q-ma-md">
+            <q-card class="my-card q-mb-md">
               <q-item class="q-pa-md">
                 <q-item-section>
                   <q-item-label class="name">{{ element.symbol }}</q-item-label>
@@ -145,7 +145,9 @@ export default defineComponent({
   color: #adbac7;
   .my-card {
     background-color: #22272e;
-    // background-color: #2d333b;
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   .change {
     &.up {

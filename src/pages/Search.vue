@@ -1,36 +1,35 @@
 <template>
-  <q-card class="my-card">
-    <q-card-section>
-      <div class="text-h6 header">Search Symbol</div>
-    </q-card-section>
+  <q-page>
+    <q-card class="my-card">
+      <q-card-section>
+        <div class="text-h6 header">Search Symbol</div>
+      </q-card-section>
+    </q-card>
 
-    <q-separator />
+    <q-list class="q-pa-md">
+      <q-card-section>
+        <q-input dark dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
+      </q-card-section>
+      <q-card class="my-card">
+        <q-card-section class="scroll row justify-between">
+          <q-btn
+            class="symbol q-ma-sm"
+            v-for="symbol in autocompleteSymbols"
+            :key="symbol"
+            @click="addSymbol(exchange, symbol)"
+          >
+            {{ symbol }}
+          </q-btn>
+        </q-card-section>
+      </q-card>
 
-    <q-card-section class="q-pt-none">
-      <q-input dark dense :modelValue="symbolName" @update:modelValue="autocomplete" autofocus />
-    </q-card-section>
-
-    <q-separator />
-
-    <q-card-section style="max-height: 50vh" class="scroll">
-      <p
-        class="symbol"
-        v-for="symbol in autocompleteSymbols"
-        :key="symbol"
-        @click="addSymbol(exchange, symbol)"
-      >
-        {{ symbol }}
-      </p>
-    </q-card-section>
-
-    <q-separator />
-
-    <q-card-actions align="right">
-      <router-link to="/">
-        <q-btn flat label="Decline" class="text-amber" v-close-popup />
-      </router-link>
-    </q-card-actions>
-  </q-card>
+      <q-card-actions align="right">
+        <router-link to="/">
+          <q-btn flat label="Decline" class="text-amber" v-close-popup />
+        </router-link>
+      </q-card-actions>
+    </q-list>
+  </q-page>
 </template>
 
 <script lang="ts">

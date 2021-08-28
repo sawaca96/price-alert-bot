@@ -1,17 +1,17 @@
 <template>
-  <q-card class="my-card">
-    <q-card-section>
-      <div class="text-h6 header">Setting</div>
-    </q-card-section>
+  <q-page>
+    <q-card class="my-card q-mb-md">
+      <q-card-section>
+        <div class="text-h6 header">Setting</div>
+      </q-card-section>
+    </q-card>
 
-    <q-separator />
-
-    <q-card-section style="max-height: 50vh; width: 30vh" class="scroll">
-      <q-list>
-        <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
-          <q-item>
+    <q-list class="q-pa-md">
+      <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
+        <q-card class="my-card q-mb-md">
+          <q-item class="q-pa-md">
             <q-item-section>
-              <q-item-label class="symbol">{{ watchSymbol.symbol }}</q-item-label>
+              <q-item-label class="symbol text-weight-bold">{{ watchSymbol.symbol }}</q-item-label>
             </q-item-section>
 
             <q-item-section side>
@@ -25,20 +25,15 @@
               />
             </q-item-section>
           </q-item>
-
-          <q-separator spaced inset />
-        </div>
-      </q-list>
-    </q-card-section>
-
-    <q-separator />
-
-    <q-card-actions align="right">
-      <router-link to="/">
-        <q-btn flat label="Decline" class="text-amber" v-close-popup />
-      </router-link>
-    </q-card-actions>
-  </q-card>
+        </q-card>
+      </div>
+      <q-card-actions align="right">
+        <router-link to="/">
+          <q-btn flat label="Decline" class="text-amber" v-close-popup />
+        </router-link>
+      </q-card-actions>
+    </q-list>
+  </q-page>
 </template>
 
 <script lang="ts">
