@@ -1,5 +1,5 @@
 import { IDBPDatabase, openDB } from 'idb';
-import { WatchSymbol } from '../components/models';
+import { WatchSymbol } from '../types/price-alert-bot';
 export interface IDBError {
   code: number;
   message: string;

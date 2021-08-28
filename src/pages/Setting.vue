@@ -40,7 +40,7 @@
 import { defineComponent, computed } from 'vue';
 import { useStore } from '../store';
 
-import { WatchSymbol } from '../components/models';
+import { WatchSymbol } from '../types/price-alert-bot';
 import { db } from '../core/indexed-db';
 
 export default defineComponent({

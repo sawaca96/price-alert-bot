@@ -43,13 +43,9 @@ import { useStore } from '../store';
 import axios from 'axios';
 import { db, initialize, updatePosition } from '../core/indexed-db';
 import { ws, subscribe, createWebSocket, unsubscribe } from '../core/binance-websocket';
-import {
-  BinanceAggTradeStreams,
-  WatchSymbol,
-  BinanceMiniTicker,
-  Binance24HrTicker,
-  draggableEvent,
-} from '../components/models';
+import { BinanceAggTradeStreams, BinanceMiniTicker, Binance24HrTicker } from '../types/binance';
+import { WatchSymbol } from '../types/price-alert-bot';
+import { draggableEvent } from '../types/event';
 import { exponentialToNumber } from '../utils/exponential-to-number';
 
 import draggable from 'vuedraggable';

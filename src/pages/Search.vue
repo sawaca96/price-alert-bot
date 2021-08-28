@@ -38,7 +38,8 @@ import { useStore } from '../store';
 
 import axios from 'axios';
 
-import { ExchangeInfo, WatchSymbol } from '../components/models';
+import { ExchangeInfo } from '../types/binance';
+import { WatchSymbol } from '../types/price-alert-bot';
 import { db, IDBError } from '../core/indexed-db';
 
 const searchSymbol = () => {

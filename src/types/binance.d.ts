@@ -83,16 +83,3 @@ export interface ExchangeInfo {
   symbols: BinanceSymbol[];
   timezone: string;
 }
-
-export interface WatchSymbol {
-  type: string;
-  symbol: string;
-  alertPrice: number;
-  position: number;
-}
-
-export interface draggableEvent {
-  element: WatchSymbol;
-  newIndex: number;
-  oldIndex: number;
-}

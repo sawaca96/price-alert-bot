@@ -1,7 +1,7 @@
 import { store } from 'quasar/wrappers';
 import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as vuexUseStore } from 'vuex';
-import { WatchSymbol } from '../components/models';
+import { WatchSymbol } from '../types/price-alert-bot';
 
 /*
  * If not building with SSR mode, you can
