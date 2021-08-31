@@ -40,7 +40,8 @@ import axios from 'axios';
 
 import { ExchangeInfo } from '../types/binance';
 import { WatchSymbol } from '../types/price-alert-bot';
-import { db, IDBError } from '../core/indexed-db';
+import { IDBError } from '../types/error';
+import { db } from '../core/indexed-db';
 
 const searchSymbol = () => {
   const symbolName = ref('');

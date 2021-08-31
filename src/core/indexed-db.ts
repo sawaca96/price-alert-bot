@@ -1,10 +1,5 @@
 import { IDBPDatabase, openDB } from 'idb';
 import { WatchSymbol } from '../types/price-alert-bot';
-export interface IDBError {
-  code: number;
-  message: string;
-  name: string;
-}
 
 export let db: IDBPDatabase<unknown>;
 
