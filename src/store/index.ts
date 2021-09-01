@@ -16,6 +16,8 @@ export interface StateInterface {
   watchSymbols: WatchSymbol[];
   watchlistName: string;
   exchange: string;
+  priceMap: Record<string, string>;
+  changeMap: Record<string, number>;
 }
 
 // provide typings for `this.$store`
@@ -35,6 +37,8 @@ export default store(function (/* { ssrContext } */) {
       watchSymbols: [],
       watchlistName: 'watchlist',
       exchange: 'BINANCE',
+      priceMap: {},
+      changeMap: {},
     }),
     mutations: {
       SET_WATCH_SYMBOLS(state: StateInterface, symbols: WatchSymbol[]) {
@@ -67,6 +71,12 @@ export default store(function (/* { ssrContext } */) {
       },
       SET_EXCHANGE(state: StateInterface, exchange: string) {
         state.exchange = exchange;
+      },
+      UPDATE_PRICE_MAP(state: StateInterface, { symbol, price }: Record<string, string>) {
+        state.priceMap[symbol] = price;
+      },
+      UPDATE_CHANGE_MAP(state: StateInterface, { symbol, change }: Record<string, number>) {
+        state.changeMap[symbol] = change;
       },
     },
     // enable strict mode (adds overhead!)

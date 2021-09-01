@@ -37,15 +37,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, onMounted, reactive, onBeforeUnmount } from 'vue';
+import { defineComponent, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from '../store';
 import { useQuasar } from 'quasar';
 
 import axios from 'axios';
+import bexHook from '../core/bex-hook';
 import { db, initIDB, updatePosition } from '../core/indexed-db';
 import { Binance24HrTicker } from '../types/binance';
 import { WatchSymbol } from '../types/price-alert-bot';
-import { DraggableEvent, BexBinanceAggTrade, BexBinance24hrMiniTicker } from '../types/event';
+import { DraggableEvent } from '../types/event';
 import { exponentialToNumber } from '../utils/exponential-to-number';
 
 import draggable from 'vuedraggable';
@@ -61,8 +62,15 @@ export default defineComponent({
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
     });
-    const priceMap: Record<string, string> = reactive({});
-    const changeMap: Record<string, number> = reactive({});
+    const priceMap = computed(() => {
+      return store.state.priceMap;
+    });
+    const changeMap = computed(() => {
+      return store.state.changeMap;
+    });
+    const { updateAggTrade, updateMiniTicker } = bexHook(store);
+    $q.bex.on('websocket.binance.aggTrade', updateAggTrade);
+    $q.bex.on('websocket.binance.24hrMiniTicker', updateMiniTicker);
 
     const changePosition = async (e: Record<string, DraggableEvent>) => {
       const moved = e.moved;
@@ -78,60 +86,55 @@ export default defineComponent({
         newPosition + 1
       );
     };
-    const getSymbolPrice = async (watchSymbol: WatchSymbol) => {
-      const price = await axios.get<Record<string, string>>(
+    const getPrice = async (symbol: string) => {
+      const priceResponse = await axios.get<Record<string, string>>(
         'https://api.binance.com/api/v3/ticker/price',
         {
           params: {
-            symbol: watchSymbol.symbol,
+            symbol,
           },
         }
       );
-      const change = await axios.get<Binance24HrTicker>(
+      const price = exponentialToNumber(parseFloat(priceResponse.data.price));
+      store.commit('UPDATE_PRICE_MAP', { symbol, price });
+    };
+    const getChange = async (symbol: string) => {
+      const changeResponse = await axios.get<Binance24HrTicker>(
         'https://api.binance.com/api/v3/ticker/24hr',
         {
           params: {
-            symbol: watchSymbol.symbol,
+            symbol,
           },
         }
       );
-      priceMap[watchSymbol.symbol] = exponentialToNumber(parseFloat(price.data.price));
-      const openPrice = parseFloat(change.data.openPrice);
-      const lastPrice = parseFloat(change.data.lastPrice);
-      const changePercent = openPrice === 0 ? 0 : (lastPrice - openPrice) / openPrice;
-      changeMap[watchSymbol.symbol] = changePercent;
+      const openPrice = parseFloat(changeResponse.data.openPrice);
+      const lastPrice = parseFloat(changeResponse.data.lastPrice);
+      const change = openPrice === 0 ? 0 : (lastPrice - openPrice) / openPrice;
+      store.commit('UPDATE_CHANGE_MAP', { symbol, change });
     };
     const fetchWatchSymbols = async () => {
+      // indexed-db에 있어도 되지 않을까
       const watchSymbols = (await db.getAllFromIndex(
         store.state.watchlistName,
         'position'
       )) as WatchSymbol[];
+      // 이거 왜 필요하더라
       if (!watchSymbols.length) return;
       store.commit('SET_WATCH_SYMBOLS', watchSymbols);
     };
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    const updateAggTrade = (event: object | undefined) => {
-      const payload = (event as BexBinanceAggTrade).data;
-      priceMap[payload.s] = exponentialToNumber(parseFloat(payload.p));
-    };
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    const updateMiniTicker = (event: object | undefined) => {
-      const payload = (event as BexBinance24hrMiniTicker).data;
-      changeMap[payload.s] = (payload.c - payload.o) / payload.o;
-    };
 
-    $q.bex.on('websocket.binance.aggTrade', updateAggTrade);
-    $q.bex.on('websocket.binance.24hrMiniTicker', updateMiniTicker);
     onMounted(async () => {
       await initIDB('price-alert-bot', [store.state.watchlistName]);
       await fetchWatchSymbols();
       let promises = [];
       for (let watchSymbol of watchSymbols.value) {
-        promises.push(getSymbolPrice(watchSymbol));
+        promises.push(getPrice(watchSymbol.symbol));
+        promises.push(getChange(watchSymbol.symbol));
       }
       await Promise.all(promises);
-      const symbols = watchSymbols.value.map((x) => x.symbol);
-      await $q.bex.send('websocket.binance.subscribe', { symbols });
+      await $q.bex.send('websocket.binance.subscribe', {
+        symbols: watchSymbols.value.map((x) => x.symbol),
+      });
     });
     onBeforeUnmount(() => {
       $q.bex.off('websocket.binance.aggTrade', updateAggTrade);
