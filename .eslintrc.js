@@ -88,4 +88,16 @@ module.exports = {
     // allow debugger during development only
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
   },
+
+  overrides: [
+    {
+      files: ['**/*.js'],
+      rules: {
+        '@typescript-eslint/no-unsafe-call': 0,
+        '@typescript-eslint/no-unsafe-member-access': 0,
+        '@typescript-eslint/restrict-template-expressions': 0,
+        '@typescript-eslint/no-unsafe-assignment': 0,
+      },
+    },
+  ],
 };

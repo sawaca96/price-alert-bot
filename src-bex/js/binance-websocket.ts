@@ -1,8 +1,4 @@
-export let ws: WebSocket;
-
-export const createWebSocket = () => {
-  ws = new WebSocket('wss://stream.binance.com:9443/ws');
-};
+export const ws = new WebSocket('wss://stream.binance.com:9443/ws');
 
 const send = function (message: string, interval: number) {
   if (ws.readyState === 1) {

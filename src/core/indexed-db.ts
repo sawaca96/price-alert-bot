@@ -3,7 +3,7 @@ import { WatchSymbol } from '../types/price-alert-bot';
 
 export let db: IDBPDatabase<unknown>;
 
-export const initialize = async (database: string, tableNames: string[]) => {
+export const initIDB = async (database: string, tableNames: string[]) => {
   try {
     db = await openDB(database, 1, {
       upgrade(db: IDBPDatabase) {
