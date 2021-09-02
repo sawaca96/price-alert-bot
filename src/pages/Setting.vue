@@ -49,12 +49,14 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { useStore } from '../store';
+import { useQuasar } from 'quasar';
 
 import { WatchSymbol } from '../types/price-alert-bot';
 import { db, update } from '../core/indexed-db';
 
 export default defineComponent({
   setup() {
+    const $q = useQuasar();
     const store = useStore();
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
@@ -63,6 +65,7 @@ export default defineComponent({
     const deleteSymbol = async (watchSymbol: WatchSymbol) => {
       await db.delete(store.state.watchlistName, watchSymbol.symbol);
       store.commit('DELETE_WATCH_SYMBOLS', watchSymbol.symbol);
+      await $q.bex.send('websocket.binance.unsubscribe', { watchSymbol });
     };
     const updateAlertPrice = async (e: string, watchSymbol: WatchSymbol) => {
       // TODO: 왜 value 스트링으로 들어올까 ?

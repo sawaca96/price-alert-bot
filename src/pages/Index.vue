@@ -134,7 +134,7 @@ export default defineComponent({
       }
       await Promise.all(promises);
       await $q.bex.send('websocket.binance.subscribe', {
-        symbols: watchSymbols.value.map((x) => x.symbol),
+        watchSymbols: watchSymbols.value,
       });
     });
     onBeforeUnmount(() => {

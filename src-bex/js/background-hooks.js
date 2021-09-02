@@ -3,7 +3,7 @@
 
 // More info: https://quasar.dev/quasar-cli/developing-browser-extensions/background-hooks
 
-import { ws, subscribe } from './binance-websocket';
+import { ws, subscribe, unsubscribe } from './binance-websocket';
 
 export default function attachBackgroundHooks(bridge /* , allActiveConnections */) {
   // bridge.on('storage.get', (event) => {
@@ -35,9 +35,20 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
   //     bridge.send(event.eventResponseKey, payload.data);
   //   });
   // });
+  let watchSymbols = [];
   bridge.on('websocket.binance.subscribe', (event) => {
-    if (!event.data.symbols.length) return;
-    subscribe(event.data.symbols);
+    watchSymbols = [...event.data.watchSymbols];
+    const symbols = watchSymbols.map((watchSymbol) => watchSymbol.symbol);
+    if (!symbols.length) return;
+    subscribe(symbols);
+  });
+  bridge.on('websocket.binance.unsubscribe', (event) => {
+    const watchSymbol = event.data.watchSymbol;
+    unsubscribe([watchSymbol.symbol]);
+    watchSymbols = watchSymbols.filter((item) => {
+      if (item.symbol === watchSymbol.symbol) return false;
+      else return true;
+    });
   });
   ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
