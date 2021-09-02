@@ -53,9 +53,17 @@ export default store(function (/* { ssrContext } */) {
       },
       UPDATE_WATCH_SYMBOL_ALERT_PRICE(
         state: StateInterface,
-        { symbolIndex, alertPrice }: Record<string, number>
+        { symbol, alertPrice }: Record<string, string | number>
       ) {
-        state.watchSymbols[symbolIndex].alertPrice = alertPrice;
+        const index = state.watchSymbols.findIndex((watchSymbol) => watchSymbol.symbol === symbol);
+        state.watchSymbols[index].alertPrice = alertPrice as number;
+      },
+      UPDATE_WATCH_SYMBOL_ALERT_TYPE(
+        state: StateInterface,
+        { symbol, alertType }: Record<string, string>
+      ) {
+        const index = state.watchSymbols.findIndex((watchSymbol) => watchSymbol.symbol === symbol);
+        state.watchSymbols[index].alertType = alertType;
       },
       DELETE_WATCH_SYMBOLS(state: StateInterface, symbol: string) {
         state.watchSymbols = state.watchSymbols.filter((watchSymbol) => {

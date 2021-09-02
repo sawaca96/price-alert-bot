@@ -59,6 +59,7 @@ export default defineComponent({
   setup() {
     const $q = useQuasar();
     const store = useStore();
+    // store.state로 사용하는거랑 computed로 사용하는거 차이점 ?
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
     });
@@ -68,7 +69,7 @@ export default defineComponent({
     const changeMap = computed(() => {
       return store.state.changeMap;
     });
-    const { updateAggTrade, updateMiniTicker } = bexHook(store);
+    const { updateAggTrade, updateMiniTicker } = bexHook();
     $q.bex.on('websocket.binance.aggTrade', updateAggTrade);
     $q.bex.on('websocket.binance.24hrMiniTicker', updateMiniTicker);
 

@@ -7,7 +7,7 @@
     </q-card>
 
     <q-list class="q-pa-md">
-      <div class="item-wrap" v-for="(watchSymbol, index) in watchSymbols" :key="watchSymbol.symbol">
+      <div class="item-wrap" v-for="watchSymbol in watchSymbols" :key="watchSymbol.symbol">
         <q-card class="my-card q-mb-md">
           <q-item class="q-pa-md row content-between">
             <q-item-section>
@@ -20,7 +20,7 @@
                 dense
                 type="number"
                 :model-value="watchSymbol.alertPrice"
-                @change="updateAlertPrice($event, index, watchSymbol)"
+                @change="updateAlertPrice($event, watchSymbol)"
               />
             </q-item-section>
 
@@ -64,11 +64,15 @@ export default defineComponent({
       await db.delete(store.state.watchlistName, watchSymbol.symbol);
       store.commit('DELETE_WATCH_SYMBOLS', watchSymbol.symbol);
     };
-    const updateAlertPrice = async (e: string, symbolIndex: number, watchSymbol: WatchSymbol) => {
-      // TODO: why value is string?
+    const updateAlertPrice = async (e: string, watchSymbol: WatchSymbol) => {
+      // TODO: 왜 value 스트링으로 들어올까 ?
       const alertPrice = parseFloat(e);
-      store.commit('UPDATE_WATCH_SYMBOL_ALERT_PRICE', { symbolIndex, alertPrice });
+      const price = parseFloat(store.state.priceMap[watchSymbol.symbol]);
+      const alertType = alertPrice > price ? 'upper' : 'lower';
+      store.commit('UPDATE_WATCH_SYMBOL_ALERT_PRICE', { symbol: watchSymbol.symbol, alertPrice });
+      store.commit('UPDATE_WATCH_SYMBOL_ALERT_TYPE', { symbol: watchSymbol.symbol, alertType });
       await update(store.state.watchlistName, 'alertPrice', watchSymbol);
+      await update(store.state.watchlistName, 'alertType', watchSymbol);
     };
 
     return { watchSymbols, updateAlertPrice, deleteSymbol };

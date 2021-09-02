@@ -83,6 +83,7 @@ export default defineComponent({
           type: exchange,
           symbol: symbol,
           alertPrice: 0,
+          alertType: '',
           position: store.state.watchSymbols.length + 1,
         };
         await db.add(store.state.watchlistName, watchSymbol, watchSymbol.symbol);

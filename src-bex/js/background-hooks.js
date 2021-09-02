@@ -47,4 +47,13 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
       bridge.send('websocket.binance.24hrMiniTicker', data);
     }
   };
+  bridge.on('notification.price', (event) => {
+    const watchSymbol = event.data.watchSymbol;
+    chrome.notifications.create('', {
+      title: 'Price Alert',
+      message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
+      iconUrl: 'icons/price-alert-bot-48.png',
+      type: 'basic',
+    });
+  });
 }
