@@ -138,6 +138,7 @@ export default defineComponent({
     onBeforeUnmount(() => {
       $q.bex.off('websocket.binance.aggTrade', updateAggTrade);
       $q.bex.off('websocket.binance.24hrMiniTicker', updateMiniTicker);
+      $q.bex.off('watchSymbol.alertType.update', updateAlertType);
     });
     return { watchSymbols, priceMap, changeMap, changePosition };
   },

@@ -6,54 +6,36 @@
 import { ws, subscribe, unsubscribe } from './binance-websocket';
 
 export default function attachBackgroundHooks(bridge /* , allActiveConnections */) {
-  // bridge.on('storage.get', (event) => {
-  //   const payload = event.data;
-  //   if (payload.key === null) {
-  //     chrome.storage.local.get(null, (r) => {
-  //       const result = [];
-  //       // Group the items up into an array to take advantage of the bridge's chunk splitting.
-  //       for (const itemKey in r) {
-  //         result.push(r[itemKey]);
-  //       }
-  //       bridge.send(event.eventResponseKey, result);
-  //     });
-  //   } else {
-  //     chrome.storage.local.get([payload.key], (r) => {
-  //       bridge.send(event.eventResponseKey, r[payload.key]);
-  //     });
-  //   }
-  // });
-  // bridge.on('storage.set', (event) => {
-  //   const payload = event.data;
-  //   chrome.storage.local.set({ [payload.key]: payload.data }, () => {
-  //     bridge.send(event.eventResponseKey, payload.data);
-  //   });
-  // });
-  // bridge.on('storage.remove', (event) => {
-  //   const payload = event.data;
-  //   chrome.storage.local.remove(payload.key, () => {
-  //     bridge.send(event.eventResponseKey, payload.data);
-  //   });
-  // });
   let watchSymbols = [];
+  let ignoreSymbols = [];
+  let popupOpened = true;
+  const closePopup = () => {
+    popupOpened = false;
+    chrome.windows.onFocusChanged.removeListener(closePopup);
+  };
+  bridge.on('bex.opened', () => {
+    chrome.windows.onFocusChanged.addListener(closePopup);
+  });
+
+  const sendNotification = (watchSymbol) => {
+    if (ignoreSymbols.includes(watchSymbol.symbol)) return;
+    if (popupOpened) return;
+    chrome.notifications.create('', {
+      title: 'Price Alert',
+      message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
+      iconUrl: 'icons/price-alert-bot-48.png',
+      type: 'basic',
+    });
+    ignoreSymbols.push(watchSymbol.symbol);
+  };
   const checkAlertPrice = (price, symbol) => {
     const watchSymbol = watchSymbols.find((watchSymbol) => watchSymbol.symbol === symbol);
     if (price >= watchSymbol?.alertPrice && watchSymbol?.alertType === 'upper') {
-      chrome.notifications.create('', {
-        title: 'Price Alert',
-        message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
-        iconUrl: 'icons/price-alert-bot-48.png',
-        type: 'basic',
-      });
+      sendNotification(watchSymbol);
       watchSymbol.alertType = 'lower';
       bridge.send('watchSymbol.alertType.update', { watchSymbol });
     } else if (price <= watchSymbol?.alertPrice && watchSymbol?.alertType === 'lower') {
-      chrome.notifications.create('', {
-        title: 'Price Alert',
-        message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
-        iconUrl: 'icons/price-alert-bot-48.png',
-        type: 'basic',
-      });
+      sendNotification(watchSymbol);
       watchSymbol.alertType = 'upper';
       bridge.send('watchSymbol.alertType.update', { watchSymbol });
     }

@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue';
+import { defineComponent, watch, onBeforeMount } from 'vue';
 import { useStore } from '../store';
 import { useQuasar } from 'quasar';
 
@@ -37,6 +37,9 @@ export default defineComponent({
         await $q.bex.send('watchSymbol.update', { watchSymbols: store.state.watchSymbols });
       }
     );
+    onBeforeMount(async () => {
+      await $q.bex.send('bex.opened');
+    });
   },
 });
 </script>
