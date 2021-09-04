@@ -36,35 +36,46 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
   //   });
   // });
   let watchSymbols = [];
-  bridge.on('websocket.binance.subscribe', (event) => {
+  const checkAlertPrice = (price, symbol) => {
+    const watchSymbol = watchSymbols.find((watchSymbol) => watchSymbol.symbol === symbol);
+    if (price >= watchSymbol?.alertPrice && watchSymbol?.alertType === 'upper') {
+      chrome.notifications.create('', {
+        title: 'Price Alert',
+        message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
+        iconUrl: 'icons/price-alert-bot-48.png',
+        type: 'basic',
+      });
+      watchSymbol.alertType = 'lower';
+    } else if (price <= watchSymbol?.alertPrice && watchSymbol?.alertType === 'lower') {
+      chrome.notifications.create('', {
+        title: 'Price Alert',
+        message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
+        iconUrl: 'icons/price-alert-bot-48.png',
+        type: 'basic',
+      });
+      watchSymbol.alertType = 'upper';
+    }
+  };
+  bridge.on('watchsymbol.update', (event) => {
     watchSymbols = [...event.data.watchSymbols];
-    const symbols = watchSymbols.map((watchSymbol) => watchSymbol.symbol);
+  });
+  bridge.on('websocket.binance.subscribe', (event) => {
+    const symbols = event.data.watchSymbols.map((watchSymbol) => watchSymbol.symbol);
     if (!symbols.length) return;
     subscribe(symbols);
   });
   bridge.on('websocket.binance.unsubscribe', (event) => {
-    const watchSymbol = event.data.watchSymbol;
-    unsubscribe([watchSymbol.symbol]);
-    watchSymbols = watchSymbols.filter((item) => {
-      if (item.symbol === watchSymbol.symbol) return false;
-      else return true;
-    });
+    const symbols = event.data.watchSymbols.map((watchSymbol) => watchSymbol.symbol);
+    if (!symbols.length) return;
+    unsubscribe(symbols);
   });
   ws.onmessage = function (event) {
     const data = JSON.parse(event.data);
     if (data.e === 'aggTrade') {
       bridge.send('websocket.binance.aggTrade', data);
+      checkAlertPrice(data.p, data.s);
     } else if (data.e === '24hrMiniTicker') {
       bridge.send('websocket.binance.24hrMiniTicker', data);
     }
   };
-  bridge.on('notification.price', (event) => {
-    const watchSymbol = event.data.watchSymbol;
-    chrome.notifications.create('', {
-      title: 'Price Alert',
-      message: `${watchSymbol.symbol} ${watchSymbol.alertType} Hit ${watchSymbol.alertPrice} `,
-      iconUrl: 'icons/price-alert-bot-48.png',
-      type: 'basic',
-    });
-  });
 }

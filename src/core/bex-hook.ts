@@ -4,6 +4,7 @@ import { useQuasar } from 'quasar';
 import { WatchSymbol } from '../types/price-alert-bot';
 import { BexBinanceAggTrade, BexBinance24hrMiniTicker } from '../types/event';
 import { exponentialToNumber } from '../utils/exponential-to-number';
+import { update } from '../core/indexed-db';
 
 const bexHook = () => {
   const store = useStore();
@@ -19,13 +20,14 @@ const bexHook = () => {
         symbol: watchSymbol.symbol,
         alertType: 'lower',
       });
+      await update(store.state.watchlistName, 'alertType', watchSymbol);
       await $q.bex.send('notification.price', { watchSymbol });
     } else if (price <= watchSymbol?.alertPrice && watchSymbol?.alertType === 'lower') {
       store.commit('UPDATE_WATCH_SYMBOL_ALERT_TYPE', {
         symbol: watchSymbol.symbol,
         alertType: 'upper',
       });
-      await $q.bex.send('notification.price', { watchSymbol });
+      await update(store.state.watchlistName, 'alertType', watchSymbol);
     }
   };
   // eslint-disable-next-line @typescript-eslint/ban-types

@@ -65,7 +65,7 @@ export default defineComponent({
     const deleteSymbol = async (watchSymbol: WatchSymbol) => {
       await db.delete(store.state.watchlistName, watchSymbol.symbol);
       store.commit('DELETE_WATCH_SYMBOLS', watchSymbol.symbol);
-      await $q.bex.send('websocket.binance.unsubscribe', { watchSymbol });
+      await $q.bex.send('websocket.binance.unsubscribe', { watchSymbols: [watchSymbol] });
     };
     const updateAlertPrice = async (e: string, watchSymbol: WatchSymbol) => {
       // TODO: 왜 value 스트링으로 들어올까 ?

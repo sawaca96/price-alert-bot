@@ -21,10 +21,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, watch } from 'vue';
+import { useStore } from '../store';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
   name: 'MainLayout',
+  setup() {
+    const store = useStore();
+    const $q = useQuasar();
+    watch(
+      () => [store.state.watchSymbols],
+      async () => {
+        await $q.bex.send('watchsymbol.update', { watchSymbols: store.state.watchSymbols });
+      }
+    );
+  },
 });
 </script>
 
