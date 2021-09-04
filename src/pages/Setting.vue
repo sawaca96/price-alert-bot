@@ -68,7 +68,7 @@ export default defineComponent({
       await $q.bex.send('websocket.binance.unsubscribe', { watchSymbols: [watchSymbol] });
     };
     const updateAlertPrice = async (e: string, watchSymbol: WatchSymbol) => {
-      // TODO: 왜 value 스트링으로 들어올까 ?
+      // TODO: why event is string?
       const alertPrice = parseFloat(e);
       const price = parseFloat(store.state.priceMap[watchSymbol.symbol]);
       const alertType = alertPrice > price ? 'upper' : 'lower';

@@ -33,7 +33,8 @@ export default defineComponent({
     watch(
       () => [store.state.watchSymbols],
       async () => {
-        await $q.bex.send('watchsymbol.update', { watchSymbols: store.state.watchSymbols });
+        // To synchronize store and background
+        await $q.bex.send('watchSymbol.update', { watchSymbols: store.state.watchSymbols });
       }
     );
   },

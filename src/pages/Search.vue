@@ -35,6 +35,7 @@
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted } from 'vue';
 import { useStore } from '../store';
+import { useQuasar } from 'quasar';
 
 import axios from 'axios';
 
@@ -70,6 +71,7 @@ const searchSymbol = () => {
 export default defineComponent({
   setup() {
     const store = useStore();
+    const $q = useQuasar();
     const exchange = computed(() => {
       return store.state.exchange;
     });
@@ -88,6 +90,7 @@ export default defineComponent({
         };
         await db.add(store.state.watchlistName, watchSymbol, watchSymbol.symbol);
         store.commit('APPEND_WATCH_SYMBOL', watchSymbol);
+        await $q.bex.send('websocket.binance.subscribe', { watchSymbols: [watchSymbol] });
       } catch (e) {
         const { message } = e as IDBError;
         if (message === 'Key already exists in the object store.') {

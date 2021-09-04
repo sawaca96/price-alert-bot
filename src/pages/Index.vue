@@ -59,7 +59,6 @@ export default defineComponent({
   setup() {
     const $q = useQuasar();
     const store = useStore();
-    // store.state로 사용하는거랑 computed로 사용하는거 차이점 ?
     const watchSymbols = computed(() => {
       return store.state.watchSymbols;
     });
@@ -69,9 +68,10 @@ export default defineComponent({
     const changeMap = computed(() => {
       return store.state.changeMap;
     });
-    const { updateAggTrade, updateMiniTicker } = bexHook();
+    const { updateAggTrade, updateMiniTicker, updateAlertType } = bexHook();
     $q.bex.on('websocket.binance.aggTrade', updateAggTrade);
     $q.bex.on('websocket.binance.24hrMiniTicker', updateMiniTicker);
+    $q.bex.on('watchSymbol.alertType.update', updateAlertType);
 
     const changePosition = async (e: Record<string, DraggableEvent>) => {
       const moved = e.moved;
@@ -114,12 +114,10 @@ export default defineComponent({
       store.commit('UPDATE_CHANGE_MAP', { symbol, change });
     };
     const fetchWatchSymbols = async () => {
-      // indexed-db에 있어도 되지 않을까
       const watchSymbols = (await db.getAllFromIndex(
         store.state.watchlistName,
         'position'
       )) as WatchSymbol[];
-      // 이거 왜 필요하더라
       if (!watchSymbols.length) return;
       store.commit('SET_WATCH_SYMBOLS', watchSymbols);
     };

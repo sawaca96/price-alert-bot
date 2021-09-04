@@ -14,3 +14,9 @@ export interface BexBinanceAggTrade {
 export interface BexBinance24hrMiniTicker {
   data: BinanceMiniTicker;
 }
+
+export interface BexWatchSymbolAlertType {
+  data: {
+    watchSymbol: WatchSymbol;
+  };
+}

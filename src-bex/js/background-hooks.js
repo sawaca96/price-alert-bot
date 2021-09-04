@@ -46,6 +46,7 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
         type: 'basic',
       });
       watchSymbol.alertType = 'lower';
+      bridge.send('watchSymbol.alertType.update', { watchSymbol });
     } else if (price <= watchSymbol?.alertPrice && watchSymbol?.alertType === 'lower') {
       chrome.notifications.create('', {
         title: 'Price Alert',
@@ -54,9 +55,10 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
         type: 'basic',
       });
       watchSymbol.alertType = 'upper';
+      bridge.send('watchSymbol.alertType.update', { watchSymbol });
     }
   };
-  bridge.on('watchsymbol.update', (event) => {
+  bridge.on('watchSymbol.update', (event) => {
     watchSymbols = [...event.data.watchSymbols];
   });
   bridge.on('websocket.binance.subscribe', (event) => {
