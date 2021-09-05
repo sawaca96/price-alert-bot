@@ -3,6 +3,9 @@
     <q-card class="my-card q-mb-md">
       <q-card-section>
         <div class="text-h6 header">Setting</div>
+        <p class="description">
+          When you open the browser, you must open extension once to activate the Alert.
+        </p>
       </q-card-section>
     </q-card>
 
@@ -95,6 +98,9 @@ export default defineComponent({
   }
   .header {
     color: rgb(205 217 229 / 70%);
+  }
+  .description {
+    color: #adbac7;
   }
 }
 </style>
