@@ -22,7 +22,7 @@
       "css": ["css/content-css.css"]
     }
   ],
-  "permissions": ["<all_urls>", "storage", "tabs", "activeTab", "notifications"],
+  "permissions": ["<all_urls>",   "notifications"],
   "web_accessible_resources": ["www/*", "js/*", "css/*", "<all_urls>"],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';"
 }
