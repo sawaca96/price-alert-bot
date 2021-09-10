@@ -12,33 +12,17 @@
     "default_popup": "www/index.html#/popup"
   },
   "background": {
-    "scripts": [
-      "www/bex-background.js",
-      "js/background.js"
-    ],
+    "scripts": ["www/bex-background.js", "js/background.js"],
     "persistent": true
   },
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": [
-      "www/bex-content-script.js",
-      "js/content-script.js"
-    ],
-    "css": [
-      "css/content-css.css"
-    ]
-  }],
-  "permissions": [
-    "<all_urls>",
-    "storage",
-    "tabs",
-    "activeTab"
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["www/bex-content-script.js", "js/content-script.js"],
+      "css": ["css/content-css.css"]
+    }
   ],
-  "web_accessible_resources": [
-    "www/*",
-    "js/*",
-    "css/*",
-    "<all_urls>"
-  ],
+  "permissions": ["<all_urls>", "storage", "tabs", "activeTab"],
+  "web_accessible_resources": ["www/*", "js/*", "css/*", "<all_urls>"],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';"
 }

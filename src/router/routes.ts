@@ -17,9 +17,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/popup',
     component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Index.vue') },
-    ],
+    children: [{ path: '', component: () => import('pages/Index.vue') }],
   },
 ];
 
