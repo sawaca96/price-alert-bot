@@ -1,5 +1,8 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout
+    view="lHh Lpr lFf"
+    style="min-height: initial; background-color: #121212; position: static"
+  >
     <q-page-container>
       <router-view />
     </q-page-container>

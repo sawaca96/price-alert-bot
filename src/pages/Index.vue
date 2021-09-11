@@ -1,11 +1,6 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="row" style="min-height: initial; position: static">
+    <example-component title="할 일 목록" active :todos="todos" :meta="meta"></example-component>
   </q-page>
 </template>
 
@@ -21,23 +16,36 @@ export default defineComponent({
     const todos = ref<Todo[]>([
       {
         id: 1,
-        content: 'ct1',
+        content: 'Nulla voluptate fugiat Lorem sit est occaecat sit aliquip eiusmod eu eu eiusmod.',
       },
       {
         id: 2,
-        content: 'ct2',
+        content:
+          'Ex ea nostrud ad velit est consectetur voluptate laboris exercitation Lorem eiusmod.',
       },
       {
         id: 3,
-        content: 'ct3',
+        content: 'Eu ut ut enim do.',
       },
       {
         id: 4,
-        content: 'ct4',
+        content: 'Pariatur ullamco voluptate tempor incididunt fugiat labore fugiat mollit magna.',
       },
       {
         id: 5,
-        content: 'ct5',
+        content: 'Magna consequat quis labore quis nulla fugiat fugiat ipsum ad.',
+      },
+      {
+        id: 6,
+        content: 'Anim enim ex ex adipisicing sunt magna enim ea minim enim ex excepteur.',
+      },
+      {
+        id: 7,
+        content: 'Enim aliquip aliqua sint consectetur deserunt in cupidatat irure nostrud.',
+      },
+      {
+        id: 8,
+        content: 'Laborum non excepteur labore incididunt elit.',
       },
     ]);
     const meta = ref<Meta>({
