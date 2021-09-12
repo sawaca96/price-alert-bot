@@ -1,14 +1,26 @@
 <template>
   <div class="composition-component q-pa-md text-white">
     <div class="popup-header">
-      {{ title }}
-      <span class="todo-num-title">{{ clickCount }}</span>
+      <input type="text" :value="title" @input="updateTitle($event.target.value)" />
+      <span class="todo-num-title">({{ todoCount }}/{{ totalCount }})</span>
     </div>
     <ul class="list-container">
-      <li v-for="todo in todos" :key="todo.id" @click="increment" class="list-item">
-        <label class="field"><input type="checkbox" data-action="done" /></label>
+      <li v-for="todo in todos" :key="todo.id" class="list-item">
+        <label class="field"
+          ><input
+            type="checkbox"
+            :checked="todo.checked"
+            @change="checkTodo($event.target.checked, todo.id)"
+            data-action="done"
+        /></label>
         <div class="field" data-action="update">
-          <input type="text" class="input" :value="todo.content" :title="todo.content" />
+          <input
+            type="text"
+            :value="todo.content"
+            @input="updateContent($event.target.value, todo.id)"
+            :title="todo.content"
+            :class="{ checked: todo.checked }"
+          />
         </div>
         <div class="field" data-action="remove row justify-center">
           <q-btn
@@ -16,34 +28,43 @@
             dense
             icon="delete"
             aria-label="delete"
+            @click="deleteTodo(todo.id)"
             class="text-grey text-right icon-remove"
           />
         </div>
       </li>
     </ul>
     <div class="input-container">
-      <input type="text" placeholder="할 일을 입력하세요" />
+      <input type="text" @input="createTodo($event)" placeholder="할 일을 입력하세요" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, ref, toRef, Ref } from 'vue';
-import { Todo, Meta } from '../types/models';
+import { defineComponent, PropType, computed, toRef, Ref } from 'vue';
+import { Todo } from '../types/models';
 
-function useClickCount() {
-  const clickCount = ref(0);
-  function increment() {
-    clickCount.value += 1;
-    return clickCount.value;
+function useUpdateTodo() {
+  function checkTodo(checked: boolean, todoID: number) {
+    console.log(checked, todoID);
   }
+  const updateContent = (content: string, todoID: number) => {
+    console.log(content, todoID);
+  };
+  const deleteTodo = (todoID: number) => {
+    console.log(todoID);
+  };
+  const createTodo = (content: string) => {
+    console.log(content);
+  };
 
-  return { clickCount, increment };
+  return { checkTodo, updateContent, deleteTodo, createTodo };
 }
 
 function useDisplayTodo(todos: Ref<Todo[]>) {
-  const todoCount = computed(() => todos.value.length);
-  return { todoCount };
+  const totalCount = computed(() => todos.value.length);
+  const todoCount = computed(() => todos.value.filter((todo) => !todo.checked).length);
+  return { totalCount, todoCount };
 }
 
 export default defineComponent({
@@ -57,16 +78,13 @@ export default defineComponent({
       type: Array as PropType<Todo[]>,
       default: () => [],
     },
-    meta: {
-      type: Object as PropType<Meta>,
-      required: true,
-    },
-    active: {
-      type: Boolean,
-    },
   },
-  setup(props) {
-    return { ...useClickCount(), ...useDisplayTodo(toRef(props, 'todos')) };
+  setup(props, context) {
+    const updateTitle = (title: string) => {
+      console.log(title);
+      context.emit('update-title', title);
+    };
+    return { ...useUpdateTodo(), ...useDisplayTodo(toRef(props, 'todos')), updateTitle };
   },
 });
 </script>
@@ -93,15 +111,25 @@ export default defineComponent({
 
 .composition-component .popup-header {
   display: flex;
-  font-size: 14px;
-  font-weight: bold;
   margin-left: 14px;
+  input[type='text'] {
+    width: 70px;
+    height: 28px;
+    font-weight: bold;
+    color: #eeeeee;
+    border: none;
+    background: transparent;
+    outline: none;
+    &:hover {
+      background-color: #2f2f2f;
+    }
+  }
   .todo-num-title {
     font-size: 13px;
+    line-height: 28px;
     font-weight: normal;
-    padding-left: 5px;
+    padding: 1px;
     opacity: 0.5;
-    float: right;
   }
 }
 
@@ -165,9 +193,11 @@ export default defineComponent({
     border: none;
     background: transparent;
     outline: none;
-  }
-  input[type='text']:focus {
-    color: #878481;
+    &.checked {
+      color: #878481;
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
   }
 }
 
