@@ -35,30 +35,40 @@
       </li>
     </ul>
     <div class="input-container">
-      <input type="text" @input="createTodo($event)" placeholder="할 일을 입력하세요" />
+      <input
+        type="text"
+        v-model="newTodo"
+        @keyup.enter="createTodo($event.target.value)"
+        placeholder="할 일을 입력하세요"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, toRef, Ref } from 'vue';
+import { defineComponent, computed, toRef, Ref, ref } from 'vue';
+import { useStore } from '../store';
+
 import { Todo } from '../types/models';
 
-function useUpdateTodo() {
+function useTodoApi() {
+  const store = useStore();
+  const newTodo = ref('');
   function checkTodo(checked: boolean, todoID: number) {
-    console.log(checked, todoID);
+    store.commit('CHECK_TODO', { todoID, checked });
   }
   const updateContent = (content: string, todoID: number) => {
-    console.log(content, todoID);
+    store.commit('UPDATE_TODO_CONTENT', { todoID, content });
   };
   const deleteTodo = (todoID: number) => {
-    console.log(todoID);
+    store.commit('DELETE_TODO', todoID);
   };
   const createTodo = (content: string) => {
-    console.log(content);
+    store.commit('CREATE_TODO', content);
+    newTodo.value = '';
   };
 
-  return { checkTodo, updateContent, deleteTodo, createTodo };
+  return { checkTodo, updateContent, deleteTodo, createTodo, newTodo };
 }
 
 function useDisplayTodo(todos: Ref<Todo[]>) {
@@ -74,17 +84,20 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    todos: {
-      type: Array as PropType<Todo[]>,
-      default: () => [],
-    },
   },
-  setup(props, context) {
+  setup(_, context) {
+    const store = useStore();
+    const todos = computed(() => store.state.todos);
     const updateTitle = (title: string) => {
-      console.log(title);
       context.emit('update-title', title);
     };
-    return { ...useUpdateTodo(), ...useDisplayTodo(toRef(props, 'todos')), updateTitle };
+
+    return {
+      todos,
+      updateTitle,
+      ...useTodoApi(),
+      ...useDisplayTodo(toRef(store.state, 'todos')),
+    };
   },
 });
 </script>
@@ -92,7 +105,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .composition-component {
   width: 482px;
-  height: 372px;
+  height: 376px;
 }
 
 .composition-component .input-container {
