@@ -50,26 +50,43 @@ import { defineComponent, computed, toRef, Ref, ref } from 'vue';
 import { useStore } from '../store';
 
 import { Todo } from '../types/models';
+import { idb, idbUpdate } from '../core/idb';
 
-function useTodoApi() {
+const useTodoApi = () => {
   const store = useStore();
   const newTodo = ref('');
-  function checkTodo(checked: boolean, todoID: number) {
+  const checkTodo = async (checked: boolean, todoID: number) => {
     store.commit('CHECK_TODO', { todoID, checked });
-  }
-  const updateContent = (content: string, todoID: number) => {
+    const index = store.state.todos.findIndex((todo) => todo.id === todoID);
+    const todo = store.state.todos[index];
+    await idbUpdate('todolist', 'checked', todo);
+  };
+  const updateContent = async (content: string, todoID: number) => {
     store.commit('UPDATE_TODO_CONTENT', { todoID, content });
+    const index = store.state.todos.findIndex((todo) => todo.id === todoID);
+    const todo = store.state.todos[index];
+    await idbUpdate('todolist', 'content', todo);
   };
-  const deleteTodo = (todoID: number) => {
+  const deleteTodo = async (todoID: number) => {
     store.commit('DELETE_TODO', todoID);
+    await idb.delete('todolist', IDBKeyRange.only(todoID));
   };
-  const createTodo = (content: string) => {
-    store.commit('CREATE_TODO', content);
+  const createTodo = async (content: string) => {
+    const todoID = await idb.add('todolist', {
+      checked: false,
+      content,
+    });
+    const todo = {
+      checked: false,
+      content,
+      id: todoID,
+    };
+    store.commit('CREATE_TODO', todo);
     newTodo.value = '';
   };
 
   return { checkTodo, updateContent, deleteTodo, createTodo, newTodo };
-}
+};
 
 function useDisplayTodo(todos: Ref<Todo[]>) {
   const totalCount = computed(() => todos.value.length);

@@ -41,53 +41,12 @@ export default store(function (/* { ssrContext } */) {
       // example
     },
     state: () => ({
-      todos: [
-        {
-          id: 1,
-          content:
-            'Nulla voluptate fugiat Lorem sit est occaecat sit aliquip eiusmod eu eu eiusmod.',
-          checked: true,
-        },
-        {
-          id: 2,
-          content:
-            'Ex ea nostrud ad velit est consectetur voluptate laboris exercitation Lorem eiusmod.',
-          checked: true,
-        },
-        {
-          id: 3,
-          content: 'Eu ut ut enim do.',
-          checked: false,
-        },
-        {
-          id: 4,
-          content:
-            'Pariatur ullamco voluptate tempor incididunt fugiat labore fugiat mollit magna.',
-          checked: false,
-        },
-        {
-          id: 5,
-          content: 'Magna consequat quis labore quis nulla fugiat fugiat ipsum ad.',
-          checked: false,
-        },
-        {
-          id: 6,
-          content: 'Anim enim ex ex adipisicing sunt magna enim ea minim enim ex excepteur.',
-          checked: false,
-        },
-        {
-          id: 7,
-          content: 'Enim aliquip aliqua sint consectetur deserunt in cupidatat irure nostrud.',
-          checked: false,
-        },
-        {
-          id: 8,
-          content: 'Laborum non excepteur labore incididunt elit.',
-          checked: false,
-        },
-      ],
+      todos: [],
     }),
     mutations: {
+      SET_TODOS(state: StateInterface, todos: Todo[]) {
+        state.todos = todos;
+      },
       CHECK_TODO(state: StateInterface, { todoID, checked }: IcheckTodo) {
         const index = state.todos.findIndex((todo) => todo.id === todoID);
         state.todos[index].checked = checked;
@@ -100,12 +59,7 @@ export default store(function (/* { ssrContext } */) {
         const index = state.todos.findIndex((todo) => todo.id === todoID);
         state.todos.splice(index, 1);
       },
-      CREATE_TODO(state: StateInterface, content: string) {
-        const todo: Todo = {
-          id: state.todos.length,
-          checked: false,
-          content,
-        };
+      CREATE_TODO(state: StateInterface, todo: Todo) {
         state.todos.push(todo);
       },
     },
