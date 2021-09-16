@@ -149,6 +149,7 @@ export default defineComponent({
     font-weight: bold;
     color: #eeeeee;
     border: none;
+    border-radius: 4px;
     background: transparent;
     outline: none;
     &:hover {
@@ -222,6 +223,7 @@ export default defineComponent({
     font-size: 13px;
     color: #eeeeee;
     border: none;
+    border-radius: 4px;
     background: transparent;
     outline: none;
     &.checked {
