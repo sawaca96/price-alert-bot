@@ -12,7 +12,7 @@ export default defineComponent({
   name: 'PageIndex',
   components: { ExampleComponent },
   setup() {
-    const title = ref('할 일 목록');
+    const title = ref(localStorage.getItem('title') || '할 일 목록');
     return { title };
   },
 });

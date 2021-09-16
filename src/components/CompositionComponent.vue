@@ -107,6 +107,7 @@ export default defineComponent({
     const todos = computed(() => store.state.todos);
     const updateTitle = (title: string) => {
       context.emit('update-title', title);
+      localStorage.setItem('title', title);
     };
 
     return {
