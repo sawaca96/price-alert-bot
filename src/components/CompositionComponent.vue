@@ -48,18 +48,21 @@
 <script lang="ts">
 import { defineComponent, computed, toRef, Ref, ref } from 'vue';
 import { useStore } from '../store';
+import { useQuasar } from 'quasar';
 
 import { Todo } from '../types/models';
 import { idb, idbUpdate } from '../core/idb';
 
 const useTodoApi = () => {
   const store = useStore();
+  const $q = useQuasar();
   const newTodo = ref('');
   const checkTodo = async (checked: boolean, todoID: number) => {
     store.commit('CHECK_TODO', { todoID, checked });
     const index = store.state.todos.findIndex((todo) => todo.id === todoID);
     const todo = store.state.todos[index];
     await idbUpdate('todolist', 'checked', todo);
+    await $q.bex.send('todolist.checked', {});
   };
   const updateContent = async (content: string, todoID: number) => {
     store.commit('UPDATE_TODO_CONTENT', { todoID, content });

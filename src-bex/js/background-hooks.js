@@ -56,4 +56,12 @@ export default function attachBackgroundHooks(bridge /* , allActiveConnections *
     }
   })
    */
+  bridge.on('todolist.checked', () => {
+    chrome.notifications.create('', {
+      title: 'Price Alert',
+      message: 'Great job!',
+      iconUrl: 'icons/icon-48x48.png',
+      type: 'basic',
+    });
+  });
 }
