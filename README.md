@@ -1,13 +1,3 @@
 # Price Alert Bot
 
-### Requirements
-
-- Node > 12
-- Quasar
-- Yarn
-
-### Spec
-
-- Vue3
-- Typescript
-- Indexed DB
+https://chrome.google.com/webstore/detail/price-alert-bot/fkepkjimfnadfjohpihiahobdoakedie?hl=ko
